@@ -1,0 +1,1 @@
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.light0x00/binary-tree-printer/badge.svg)](https://repo1.maven.org/maven2/io/github/light0x00/binary-tree-printer/)
