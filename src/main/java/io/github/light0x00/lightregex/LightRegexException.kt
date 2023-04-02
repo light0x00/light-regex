@@ -1,20 +1,17 @@
 package io.github.light0x00.lightregex
 
-fun readUnexpectedErrorMsg(reader: IReader, actual: String, expected: String): String {
+
+fun readUnexpectedErrorMsg(lexer: ILocalizable, expected: String, actual: String = ":\n" + lexer.nearbyChars()): String {
     return """
-                |${expected} expected ,but got ${actual} at line ${reader.line()} column ${reader.column()}
-            """.trimMargin("|")
+                |${expected} expected ,but got ${actual} at line ${lexer.line()} column ${lexer.column()}
+            """.trimMargin()
 }
 
-fun readUnexpectedErrorMsg(reader: IReader, expected: String): String {
-    return readUnexpectedErrorMsg(reader, ":\n" + reader.nearbyChars(), expected)
-}
-
-fun readErrorMsg(reader: IReader, msg: String): String {
+fun readErrorMsg(lexer: ILocalizable, msg: String): String {
     return """
                 |$msg
-                |${reader.nearbyChars()}
-                | at line ${reader.line()} column ${reader.column()}
+                |${lexer.nearbyChars()}
+                | at line ${lexer.line()} column ${lexer.column()}
                 """.trimMargin()
 }
 

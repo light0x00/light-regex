@@ -4,7 +4,7 @@ package io.github.light0x00.lightregex
  * @author light
  * @since 2023/3/24
  */
-interface IReader {
+interface IReader : ILocalizable {
 
     /**
      * 当读到最后一个字符，继续读则返回空
@@ -15,9 +15,4 @@ interface IReader {
 
     fun peek(): Char?
 
-    fun line(): Int
-
-    fun column(): Int
-
-    fun nearbyChars(): String
 }

@@ -2,77 +2,71 @@ package io.github.light0x00.lightregex
 
 import java.util.*
 
-val EOF = String()
 val Hex_Literal = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')
+val Special_Char = setOf('*', '|', '.', '(', ')')
 
 
 /**
  * @author light
  * @since 2023/3/29
  */
-class GeneralLexer(private val reader: IReader) : IPredictableLexer {
+class GeneralLexer(private val reader: IReader) : ILexer, ILocalizable by reader {
 
-    private val lookaheads = LinkedList<String>();
+    private val lookaheads = LinkedList<Token>()
 
-    override fun peek(): String {
-        return peek(1)
+    override fun lookahead(): Token {
+        return lookahead(1)
     }
 
-    override fun peek(n: Int): String {
+    override fun lookahead(n: Int): Token {
         assertTrue(n > 0)
         if (lookaheads.size < n) {
             for (i in 1..n - lookaheads.size) {
                 lookaheads.offer(nextToken())
             }
         }
-        return lookaheads.get(n - 1)
+        return lookaheads[n - 1]
     }
 
-    override fun hasNext(): Boolean {
-        return peek() !== EOF
+    override fun next(): Token {
+        return if (lookaheads.isEmpty()) nextToken() else lookaheads.poll()
     }
 
-    override fun next(): String {
-        return if (lookaheads.isEmpty()) nextToken() else lookaheads.poll();
-    }
-
-    private fun nextToken(): String {
+    private fun nextToken(): Token {
         return when (reader.peek()) {
             null -> {
                 EOF
             }
-            '*', '|', '.', '(', ')' -> {
-                reader.read().toString()
+            in Special_Char -> {
+                Token(TokenType.SPECIAL, reader.read().toString())
             }
             else -> {
-                readAsLiteral() ?: throw LightRegexException(
-                    readUnexpectedErrorMsg(reader, "Unrecognized character")
-                )
+                readAsLiteral()?.let { Token(TokenType.LITERAL, it) }
+                    ?: throw LightRegexException(
+                        readUnexpectedErrorMsg(this, expected = "Unrecognized character")
+                    )
             }
         }
     }
 
     private fun readAsLiteral(): String? {
-        val token = StringBuilder()
-        while (true) {
-            when {
-                reader.peek() == null -> {
-                    break
-                }
-                //转义字符
-                reader.peek() == '\\' -> {
-                    token.append(readEscape())
-                }
-                //数字字母
-                isLetter(reader.peek()!!) || isDigit(reader.peek()!!) -> {
-                    token.append(reader.read())
-                }
-                else -> {
-                    break
-                }
+        val lookahead = reader.peek()
+        return when {
+            lookahead == null -> {
+                null
+            }
+            //转义字符
+            lookahead == '\\' -> {
+                readEscape()
+            }
+            //数字字母
+            isLetter(lookahead) || isDigit(lookahead) -> {
+                reader.read()!!.toString()
+            }
+            else -> {
+                null
             }
         }
-        return if (token.isEmpty()) null else token.toString()
     }
 
     private fun readEscape(): String {
@@ -85,7 +79,7 @@ class GeneralLexer(private val reader: IReader) : IPredictableLexer {
             val unicode = StringBuilder(4)
             while (reader.peek() != '}') {
                 if (!Hex_Literal.contains(reader.peek())) {
-                    throw LightRegexException(readErrorMsg(reader, "Invalid unicode literal"))
+                    throw LightRegexException(readErrorMsg(this, "Invalid unicode literal"))
                 }
                 unicode.append(reader.read())
             }
@@ -94,7 +88,8 @@ class GeneralLexer(private val reader: IReader) : IPredictableLexer {
         }
         //其他
         else {
-            reader.read()?.toString() ?: throw LightRegexException(readErrorMsg(reader, "Invalid escape character"))
+            reader.read()?.toString() ?: throw LightRegexException(readErrorMsg(this, "Invalid escape character"))
         }
     }
+
 }
