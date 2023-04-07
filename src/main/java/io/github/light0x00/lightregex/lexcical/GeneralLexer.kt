@@ -1,10 +1,13 @@
-package io.github.light0x00.lightregex
+package io.github.light0x00.lightregex.lexcical
 
+import io.github.light0x00.lightregex.*
+import io.github.light0x00.lightregex.syntax.EOF_TOKEN
+import io.github.light0x00.lightregex.syntax.LiteralToken
+import io.github.light0x00.lightregex.syntax.Token
+import io.github.light0x00.lightregex.syntax.TokenType
 import java.util.*
 
 val Hex_Literal = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')
-val Special_Char = setOf('*', '|', '.', '(', ')')
-
 
 /**
  * @author light
@@ -35,13 +38,31 @@ class GeneralLexer(private val reader: IReader) : ILexer, ILocalizable by reader
     private fun nextToken(): Token {
         return when (reader.peek()) {
             null -> {
-                EOF
+                EOF_TOKEN
             }
-            in Special_Char -> {
-                Token(TokenType.SPECIAL, reader.read().toString())
+            '*' -> {
+                reader.read()
+                Token(TokenType.STAR)
             }
+            '|' -> {
+                reader.read()
+                Token(TokenType.OR)
+            }
+            '(' -> {
+                reader.read()
+                Token(TokenType.LEFT_PARENTHESIS)
+            }
+            ')' -> {
+                reader.read()
+                Token(TokenType.RIGHT_PARENTHESIS)
+            }
+            '.' -> {
+                reader.read()
+                Token(TokenType.LITERAL_ANY)
+            }
+            //TODO 支持 [zbc]  [a-b] [0-9]
             else -> {
-                readAsLiteral()?.let { Token(TokenType.LITERAL, it) }
+                readAsLiteral()?.let { LiteralToken(it) }
                     ?: throw LightRegexException(
                         readUnexpectedErrorMsg(this, expected = "Unrecognized character")
                     )

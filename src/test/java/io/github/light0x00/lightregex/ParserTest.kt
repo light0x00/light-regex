@@ -1,6 +1,8 @@
 package io.github.light0x00.lightregex
 
-import io.github.light0x00.lightregex.TokenType.LITERAL
+import io.github.light0x00.lightregex.lexcical.GeneralLexer
+import io.github.light0x00.lightregex.lexcical.StringReader
+import io.github.light0x00.lightregex.syntax.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -13,10 +15,9 @@ class ParserTest {
     @Test
     fun testParsePrimaryExpr() {
         Parser(GeneralLexer(StringReader("a")))
-            .parse().apply {
-                Assertions.assertTrue(this is PrimaryExpr)
-                (this as PrimaryExpr).apply {
-                    Assertions.assertEquals(token, Token(LITERAL, "a"))
+            .parse().also {
+                (it.expr as Token).apply {
+                    Assertions.assertEquals(LiteralToken("a"), this)
                 }
             }
     }
@@ -24,9 +25,11 @@ class ParserTest {
     @Test
     fun testParseUnaryExpr() {
         Parser(GeneralLexer(StringReader("a*")))
-            .parse().apply {
-                Assertions.assertTrue(this is UnaryExpr)
-                Assertions.assertEquals(this.toString(),"(a*)")
+            .parse().also {
+                it.expr.apply {
+                    Assertions.assertTrue(this is UnaryExpr)
+                    Assertions.assertEquals("(a*)", this.toString())
+                }
             }
     }
 
@@ -34,7 +37,7 @@ class ParserTest {
     fun testOrExpr() {
         Parser(GeneralLexer(StringReader("a|b")))
             .parse().apply {
-                Assertions.assertEquals(this.toString(),"(a|b)")
+                Assertions.assertEquals("(a|b)", this.toString())
             }
     }
 
@@ -42,7 +45,7 @@ class ParserTest {
     fun testAndExpr() {
         Parser(GeneralLexer(StringReader("a.b")))
             .parse().apply {
-                Assertions.assertEquals(this.toString(),"((a.)b)")
+                Assertions.assertEquals(this.toString(), "((a.)b)")
             }
     }
 
@@ -50,7 +53,7 @@ class ParserTest {
     fun testParse1() {
         Parser(GeneralLexer(StringReader("(ab|cd)|(e|f)g")))
             .parse().apply {
-                Assertions.assertEquals(this.toString(),"((((a(b|c))d)|(e|f))g)")
+                Assertions.assertEquals("((((a(b|c))d)|(e|f))g)", this.toString())
             }
     }
 
@@ -59,7 +62,7 @@ class ParserTest {
         Parser(GeneralLexer(StringReader("(a|b)*abb")))
             .parse().apply {
                 println(this)
-                Assertions.assertEquals(this.toString(), "(((((a|b)*)a)b)b)")
+                Assertions.assertEquals("(((((a|b)*)a)b)b)", this.toString())
             }
     }
 

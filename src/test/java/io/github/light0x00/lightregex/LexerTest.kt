@@ -1,7 +1,10 @@
 package io.github.light0x00.lightregex
 
-import io.github.light0x00.lightregex.TokenType.LITERAL
-import io.github.light0x00.lightregex.TokenType.SPECIAL
+import io.github.light0x00.lightregex.lexcical.GeneralLexer
+import io.github.light0x00.lightregex.lexcical.StringReader
+import io.github.light0x00.lightregex.syntax.LiteralToken
+import io.github.light0x00.lightregex.syntax.Token
+import io.github.light0x00.lightregex.syntax.TokenType
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -15,7 +18,7 @@ class LexerTest {
     fun testUnicode() {
         GeneralLexer(StringReader("""\u{1F914}""")).also {
             Assertions.assertIterableEquals(
-                listOf(Token(LITERAL, "🤔")),
+                listOf(LiteralToken("🤔")),
                 it.asSequence().toList()
             )
         }
@@ -27,16 +30,16 @@ class LexerTest {
             Assertions.assertIterableEquals(
                 it.asSequence().toList(),
                 listOf(
-                    Token(SPECIAL, "("),
-                    Token(LITERAL, "("),
-                    Token(LITERAL, "a"),
-                    Token(LITERAL, "\\"),
-                    Token(LITERAL, "."),
-                    Token(LITERAL, "*"),
-                    Token(LITERAL, "🤔"),
-                    Token(SPECIAL, "."),
-                    Token(SPECIAL, "*"),
-                    Token(SPECIAL, ")")
+                    Token(TokenType.LEFT_PARENTHESIS),
+                    LiteralToken("("),
+                    LiteralToken("a"),
+                    LiteralToken("\\"),
+                    LiteralToken("."),
+                    LiteralToken("*"),
+                    LiteralToken("🤔"),
+                    Token(TokenType.LITERAL_ANY),
+                    Token(TokenType.STAR),
+                    Token(TokenType.RIGHT_PARENTHESIS)
                 )
             )
         }
@@ -46,7 +49,7 @@ class LexerTest {
     fun testPredict() {
         GeneralLexer(StringReader("""\u{0000}|a"""))
             .also {
-                Assertions.assertEquals(Token(LITERAL, "a"), it.lookahead(3))
+                Assertions.assertEquals(LiteralToken("a"), it.lookahead(3))
             }
     }
 
@@ -55,14 +58,14 @@ class LexerTest {
         GeneralLexer(StringReader("""(a\|b\u{1F914}).*""")).also {
             Assertions.assertIterableEquals(
                 listOf(
-                    Token(SPECIAL, "("),
-                    Token(LITERAL, "a"),
-                    Token(LITERAL, "|"),
-                    Token(LITERAL, "b"),
-                    Token(LITERAL, "🤔"),
-                    Token(SPECIAL, ")"),
-                    Token(SPECIAL, "."),
-                    Token(SPECIAL, "*")
+                    Token(TokenType.LEFT_PARENTHESIS),
+                    LiteralToken("a"),
+                    LiteralToken("|"),
+                    LiteralToken("b"),
+                    LiteralToken("🤔"),
+                    Token(TokenType.RIGHT_PARENTHESIS),
+                    Token(TokenType.LITERAL_ANY),
+                    Token(TokenType.STAR)
                 ),
                 it.asSequence().toList()
             )

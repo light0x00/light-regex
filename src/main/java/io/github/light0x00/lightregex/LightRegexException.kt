@@ -1,5 +1,7 @@
 package io.github.light0x00.lightregex
 
+import io.github.light0x00.lightregex.lexcical.ILocalizable
+
 
 fun readUnexpectedErrorMsg(lexer: ILocalizable, expected: String, actual: String = ":\n" + lexer.nearbyChars()): String {
     return """

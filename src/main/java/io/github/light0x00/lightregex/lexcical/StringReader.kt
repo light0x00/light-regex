@@ -1,5 +1,8 @@
-package io.github.light0x00.lightregex
+package io.github.light0x00.lightregex.lexcical
 
+import io.github.light0x00.lightregex.LightRegexException
+import io.github.light0x00.lightregex.lexcical.IReader
+import io.github.light0x00.lightregex.readUnexpectedErrorMsg
 import kotlin.math.max
 import kotlin.math.min
 
@@ -69,8 +72,8 @@ class StringReader(private val str: String) : IReader {
     }
 
     override fun nearbyChars(): String {
-        val start = max(idx - 10, 0)
-        val end = min(idx + 10, str.length - 1)
+        val start = max(idx - 20, 0)
+        val end = min(idx + 20, str.length - 1)
         val spaceNum = if ((idx - start) >= column) column - 1 else idx - start - 1
         val builder = StringBuilder(end - start + 1 + spaceNum + 2)
         for (i in start..end) {
