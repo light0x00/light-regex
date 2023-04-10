@@ -1,7 +1,7 @@
 package io.github.light0x00.lightregex.visitor
 
 import io.github.light0x00.lightregex.*
-import io.github.light0x00.lightregex.syntax.*
+import io.github.light0x00.lightregex.ast.*
 
 /**
  * @author light
@@ -42,9 +42,12 @@ class FirstSetVisitor : AbstractVisitor() {
 
     override fun visitUnaryExpr(ast: UnaryExpr) {
         when (ast.operator.type) {
-            TokenType.STAR -> {
+            TokenType.ANY_TIMES,TokenType.OPTIONAL -> {
                 ast.firstSet = ast.expr.firstSet
                 ast.nullable = true
+            }
+            TokenType.AT_LEAST_ONCE-> {
+                ast.firstSet = ast.expr.firstSet
             }
             else -> {
                 throw LightRegexException("Unknown unary expr operator:" + ast.operator)
@@ -54,11 +57,11 @@ class FirstSetVisitor : AbstractVisitor() {
 
     override fun visitToken(ast: Token) {
         val input = when (ast.type) {
-            TokenType.LITERAL -> {
+            TokenType.SINGLE_LITERAL -> {
                 ast as LiteralToken
                 LiteralInput(ast.lexeme)
             }
-            TokenType.LITERAL_ANY -> {
+            TokenType.SINGLE_LITERAL_ANY -> {
                 AnyInput()
             }
             else -> {

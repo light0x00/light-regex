@@ -1,8 +1,5 @@
 package io.github.light0x00.lightregex
 
-import io.github.light0x00.lightregex.lexcical.GeneralLexer
-import io.github.light0x00.lightregex.lexcical.StringReader
-import io.github.light0x00.lightregex.syntax.Parser
 import io.github.light0x00.lightregex.visitor.FirstSetVisitor
 import io.github.light0x00.lightregex.visitor.FollowSetVisitor
 import org.junit.jupiter.api.Assertions
@@ -16,8 +13,7 @@ class FirstSetVisitorTest {
 
     @Test
     fun test1() {
-        val ast = Parser(GeneralLexer(StringReader("a|b")))
-            .parse()
+        val ast = parseAsAST("a|b")
 
         val firstSetVisitor = FirstSetVisitor()
         traversePostOrder(ast) { node ->
@@ -32,8 +28,7 @@ class FirstSetVisitorTest {
 
     @Test
     fun test2() {
-        val ast = Parser(GeneralLexer(StringReader("a*b|c")))
-            .parse()
+        val ast = parseAsAST("a*b|c")
 
         val firstSetVisitor = FirstSetVisitor()
         traversePostOrder(ast) { node ->
@@ -41,7 +36,7 @@ class FirstSetVisitorTest {
         }
 
         Assertions.assertIterableEquals(
-            setOf("a→1", "b→2","c→3"),
+            setOf("a→1", "b→2", "c→3"),
             ast.firstSet.map(Transition::toString)
         )
     }
@@ -49,8 +44,8 @@ class FirstSetVisitorTest {
 
     @Test
     fun test() {
-        val ast = Parser(GeneralLexer(StringReader("(a|b)*ab")))
-            .parse()
+        val ast = parseAsAST("(a|b)*ab")
+
         val firstSetVisitor = FirstSetVisitor()
         traversePostOrder(ast) { node ->
             firstSetVisitor.visit(node)
@@ -59,7 +54,6 @@ class FirstSetVisitorTest {
         traversePreOrder(ast) { node ->
             followSetVisitor.visit(node)
         }
-//        toAutomata(ast)
     }
 //
 //    class DFAState(val nfaStates: Set<NFAState>, val nfaTran: Map<String?, Set<NFAState>>) {

@@ -1,14 +1,13 @@
 package io.github.light0x00.lightregex
 
-import io.github.light0x00.lightregex.lexcical.GeneralLexer
-import io.github.light0x00.lightregex.lexcical.StringReader
-import io.github.light0x00.lightregex.syntax.LiteralToken
-import io.github.light0x00.lightregex.syntax.OrExpr
-import io.github.light0x00.lightregex.syntax.Parser
+import io.github.light0x00.lightregex.ast.AST
+import io.github.light0x00.lightregex.ast.LiteralToken
+import io.github.light0x00.lightregex.ast.OrExpr
 import io.github.light0x00.lightregex.visitor.FirstSetVisitor
 import io.github.light0x00.lightregex.visitor.FollowSetVisitor
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 /**
@@ -17,20 +16,41 @@ import org.junit.jupiter.api.Test
  */
 class FollowSetVisitorTest {
 
+
+    @Test
+    fun testForCurlyBracketExpr0() {
+        val ast = parseAsAST("a{2,4}bc")
+        determineFollowSet(ast)
+        println(astToPlantUML(ast))
+    }
+
+    @Test
+    fun testForCurlyBracketExpr1() {
+        val ast = parseAsAST("(a|b){2,4}c")
+        determineFollowSet(ast)
+        println(astToPlantUML(ast))
+    }
+
+    @Test
+    fun testForCurlyBracketExpr2() {
+        val ast = parseAsAST("(ab){2,4}c")
+        determineFollowSet(ast)
+        println(astToPlantUML(ast))
+    }
+
+    @Test
+    fun test5() {
+        val ast = parseAsAST("(a{2,4}b{0,2}){2,4}c")
+        determineFollowSet(ast)
+        println(astToPlantUML(ast))
+    }
+
     @Test
     fun test() {
-        val ast = Parser(GeneralLexer(StringReader("(a|b)*c")))
-            .parse()
-        //First Set
-        val firstSetVisitor = FirstSetVisitor()
-        traversePostOrder(ast) { node ->
-            firstSetVisitor.visit(node)
-        }
-        //Follow Set
-        val followSetVisitor = FollowSetVisitor()
-        traversePreOrder(ast) { node ->
-            followSetVisitor.visit(node)
-        }
+        val ast = parseAsAST("(a|b)*c")
+        determineFollowSet(ast)
+
+        println(astToPlantUML(ast))
 
         (ast.expr.children[0].children[0] as OrExpr)
             .apply {
@@ -41,6 +61,19 @@ class FollowSetVisitorTest {
                     )
                 )
             }
+    }
+
+    private fun determineFollowSet(ast: AST) {
+        //First Set
+        val firstSetVisitor = FirstSetVisitor()
+        traversePostOrder(ast) { node ->
+            firstSetVisitor.visit(node)
+        }
+        //Follow Set
+        val followSetVisitor = FollowSetVisitor()
+        traversePreOrder(ast) { node ->
+            followSetVisitor.visit(node)
+        }
     }
 
 }

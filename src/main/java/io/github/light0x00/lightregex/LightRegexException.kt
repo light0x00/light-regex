@@ -3,7 +3,15 @@ package io.github.light0x00.lightregex
 import io.github.light0x00.lightregex.lexcical.ILocalizable
 
 
-fun readUnexpectedErrorMsg(lexer: ILocalizable, expected: String, actual: String = ":\n" + lexer.nearbyChars()): String {
+fun readUnexpectedErrorMsg(lexer: ILocalizable, expected: Int): String {
+    return readUnexpectedErrorMsg(lexer, Character.toString(expected))
+}
+
+fun readUnexpectedErrorMsg(
+    lexer: ILocalizable,
+    expected: String,
+    actual: String = ":\n" + lexer.nearbyChars()
+): String {
     return """
                 |${expected} expected ,but got ${actual} at line ${lexer.line()} column ${lexer.column()}
             """.trimMargin()

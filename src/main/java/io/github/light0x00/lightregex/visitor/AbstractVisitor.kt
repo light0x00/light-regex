@@ -1,10 +1,9 @@
 package io.github.light0x00.lightregex.visitor
 
 import io.github.light0x00.lightregex.*
-import io.github.light0x00.lightregex.syntax.*
+import io.github.light0x00.lightregex.ast.*
 
 /**
- * 具有识别 AST Node 能力的
  *
  * @author light
  * @since 2023/4/2

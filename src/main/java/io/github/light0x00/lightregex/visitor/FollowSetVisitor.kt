@@ -1,7 +1,7 @@
 package io.github.light0x00.lightregex.visitor
 
 import io.github.light0x00.lightregex.*
-import io.github.light0x00.lightregex.syntax.*
+import io.github.light0x00.lightregex.ast.*
 
 /**
  * @author light
@@ -9,12 +9,15 @@ import io.github.light0x00.lightregex.syntax.*
  */
 class FollowSetVisitor : AbstractVisitor() {
 
+//    val nfa = NFA()
+
     override fun visitRegExpr(ast: RegExpr) {
         ast.expr.followSet = ast.accept.firstSet
+//        nfa.addTrans(START_STATE, trans = ast.firstSet.toList())
     }
 
     override fun visitAccept(ast: Accept) {
-
+//        nfa.addTrans(ACCEPT_STATE, trans = emptyList())
     }
 
     override fun visitAndExpr(ast: AndExpr) {
@@ -33,9 +36,15 @@ class FollowSetVisitor : AbstractVisitor() {
     }
 
     override fun visitUnaryExpr(ast: UnaryExpr) {
-        when (ast.operator.type) {
-            TokenType.STAR -> {
-                ast.expr.followSet = ast.followSet.union(ast.expr.firstSet)
+        val child = ast.expr
+        val operator = ast.operator
+
+        when (operator.type) {
+            TokenType.ANY_TIMES, TokenType.AT_LEAST_ONCE -> {
+                child.followSet = ast.followSet.union(child.firstSet)
+            }
+            TokenType.OPTIONAL -> {
+                child.followSet = ast.followSet
             }
             else -> {
                 throw LightRegexException("Unknown unary expr operator:" + ast.operator)
@@ -44,7 +53,7 @@ class FollowSetVisitor : AbstractVisitor() {
     }
 
     override fun visitToken(ast: Token) {
-
+//        nfa.addTrans(ast.state!!, ast.followSet.toList())
     }
 
 }

@@ -1,8 +1,10 @@
 package io.github.light0x00.lightregex.syntax
 
 import io.github.light0x00.lightregex.*
-import io.github.light0x00.lightregex.syntax.TokenType.*
-import io.github.light0x00.lightregex.lexcical.ILexer
+import io.github.light0x00.lightregex.ast.*
+import io.github.light0x00.lightregex.lexcical.*
+
+//import io.github.light0x00.lightregex.ast.TokenType.*
 
 /*
 //存在 And 优先级高于 Or 的情况，这样会生成错误 AST
@@ -31,35 +33,97 @@ and_expr ->
 expr -> and_expr {Follow=(')',EOF)}
 S -> expr EOF
  */
-val BINARY_EXPR_FOLLOW_SET: Set<TokenType> = setOf(TokenType.EOF, RIGHT_PARENTHESIS)
+val AND_EXPR_FOLLOW_SET: Set<TokenType> = setOf(TokenType.EOF, TokenType.RIGHT_PARENTHESIS)
 
 /**
  * @author light
  * @since 2023/3/29
  */
-class Parser(private val lexer: ILexer) {
+
+class Parser(private val lexer: IDynamicLexer) {
+
+    private fun parseRangeLiteral(): AST {
+        val literal = lexer.expectNext(TokenType.SINGLE_LITERAL)
+        literal as LiteralToken
+        if (lexer.lookahead().type == TokenType.HYPHEN) {
+            lexer.skip() //消耗掉 -
+            val literal2 = lexer.expectNext(TokenType.SINGLE_LITERAL)
+            literal2 as LiteralToken
+            return LiteralRangeToken(literal.lexeme, literal2.lexeme)
+        }
+        return literal
+    }
+
+    private fun parseSquareBracketExpr(): AST {
+        lexer.expectNext(TokenType.LEFT_SQUARE_BRACKET)
+        val originalTokenizers = lexer.switchTokenizers(TOKENIZER_SET_FOR_SQUARE_BRACKET_EXPR)
+
+        var ast = parseRangeLiteral()
+        while (lexer.lookahead().type != TokenType.RIGHT_SQUARE_BRACKET) {
+            ast = OrExpr(ast, parseRangeLiteral())
+        }
+        lexer.skip() //消耗掉 ]
+
+        lexer.switchTokenizers(originalTokenizers)
+        return ast
+    }
 
     private fun parsePrimary(): AST {
         val lookahead = lexer.lookahead()
         return when (lookahead.type) {
-            LITERAL, LITERAL_ANY, LITERAL_RANGE, LITERAL_SEQUENCE -> {
+            TokenType.SINGLE_LITERAL, TokenType.SINGLE_LITERAL_ANY -> {
                 lexer.next()
             }
-            LEFT_PARENTHESIS -> {
-                lexer.next()
+            TokenType.LEFT_PARENTHESIS -> {
+                lexer.skip()
                 val ast = parseExpr()
-                lexer.expectNext(RIGHT_PARENTHESIS)
+                lexer.expectNext(TokenType.RIGHT_PARENTHESIS)
                 ast
             }
+            TokenType.LEFT_SQUARE_BRACKET -> {
+                parseSquareBracketExpr()
+            }
             else ->
-                throw LightRegexException(readUnexpectedErrorMsg(lexer, """string literal or "(""""))
+                throw LightRegexException(readErrorMsg(lexer, """Unrecognized character"""))
         }
+    }
+
+    private fun parseUnaryExpr2(): AST {
+        var ast: AST = parsePrimary()
+
+        when (lexer.lookahead().type) {
+            TokenType.ANY_TIMES, TokenType.REPEAT_TIMES_RANGE -> {
+                ast = UnaryExpr(ast, lexer.next())
+            }
+            else -> {
+            }
+        }
+        return ast
     }
 
     private fun parseUnaryExpr(): AST {
         var ast: AST = parsePrimary()
-        if (lexer.lookahead().type == STAR) {
-            ast = UnaryExpr(ast, lexer.next())
+
+        when (lexer.lookahead().type) {
+            TokenType.ANY_TIMES,TokenType.OPTIONAL,TokenType.AT_LEAST_ONCE -> {
+                ast = UnaryExpr(ast, lexer.next())
+            }
+            TokenType.REPEAT_TIMES_RANGE -> {
+                val operator = lexer.next() as RepeatTimesRangeToken
+                val toCopy = ast;
+                for (i in 2..operator.min) {
+                    ast = AndExpr(ast, toCopy.copy())
+                }
+                if (operator.infinite) {
+                    ast = AndExpr(ast, UnaryExpr(toCopy.copy(), Token(TokenType.ANY_TIMES)))
+                } else {
+                    for (i in 1..operator.max - operator.min) {
+                        ast = AndExpr(ast, UnaryExpr(toCopy.copy(), Token(TokenType.OPTIONAL)))
+                    }
+                }
+            }
+            else -> {
+            }
         }
         return ast
     }
@@ -67,8 +131,9 @@ class Parser(private val lexer: ILexer) {
     private fun parseOrExpr(): AST {
         val ast = parseUnaryExpr()
         return when (lexer.lookahead().type) {
-            OR -> {
-                OrExpr(ast, lexer.next(), parseOrExpr())
+            TokenType.OR -> {
+                lexer.skip() //消耗掉 '|'
+                OrExpr(ast, parseOrExpr())
             }
             else -> {
                 ast
@@ -80,17 +145,12 @@ class Parser(private val lexer: ILexer) {
      * 自定底向上生成 And 树，前一个 And 会作为后一个 And 的左节点，树的生长方向为右上
      */
     private fun parseAndExpr(): AST {
-        val ast = parseOrExpr()
-        //需要 Reduce 的情况
-        if (lexer.lookahead().type in BINARY_EXPR_FOLLOW_SET) {
-            return ast
-        }
+        var ast = parseOrExpr()
         //需要继续 Shift 生成 And 的情况
-        var lastAnd = AndExpr(left = ast, right = parseOrExpr())
-        while (lexer.lookahead().type !in BINARY_EXPR_FOLLOW_SET) {
-            lastAnd = AndExpr(left = lastAnd, right = parseOrExpr())
+        while (lexer.lookahead().type !in AND_EXPR_FOLLOW_SET) {
+            ast = AndExpr(left = ast, right = parseOrExpr())
         }
-        return lastAnd
+        return ast
     }
 
     private fun parseExpr(): AST {

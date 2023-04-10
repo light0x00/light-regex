@@ -11,15 +11,15 @@ class ToolkitTest {
 
     @Test
     fun testUnicodeHexToString() {
-        unicodeHexToString("1F914").also {
+        Unicode.unicodeHexToString("1F914").also {
             println(it)
             Assertions.assertEquals("🤔", it)
         }
-        unicodeHexToString("4E2D").also {
+        Unicode.unicodeHexToString("4E2D").also {
             println(it)
             Assertions.assertEquals("中", it)
         }
-        unicodeHexToString("56FD").also {
+        Unicode.unicodeHexToString("56FD").also {
             println(it)
             Assertions.assertEquals("国", it)
         }

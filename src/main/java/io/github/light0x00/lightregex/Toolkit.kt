@@ -2,37 +2,22 @@
 
 package io.github.light0x00.lightregex
 
-import io.github.light0x00.lightregex.syntax.AST
+import io.github.light0x00.lightregex.ast.AST
 import java.util.*
+import java.util.function.Supplier
 
-fun assertTrue(condition: Boolean, msg: String = "Assertion failed") {
+fun assertTrue(condition: Boolean, exp: Supplier<Exception>) {
     if (!condition) {
-        throw LightRegexException(msg)
+        throw exp.get()
     }
 }
 
-fun isLetter(chr: Char): Boolean {
-    return isLetterSmallCase(chr) || isLetterCapitalCase(chr)
+fun assertTrue(condition: Boolean, msg: String = "Assertion failed") {
+    assertTrue(condition) { throw LightRegexException(msg) }
 }
 
-fun isLetterCapitalCase(chr: Char): Boolean {
-    return chr in '\u0041'..'\u005A'
-}
-
-fun isLetterSmallCase(chr: Char): Boolean {
-    return chr in '\u0061'..'\u007A'
-}
-
-fun isDigit(chr: Char): Boolean {
-    return chr in '\u0030'..'\u0039'
-}
-
-fun unicodeHexToString(unicode: String): String {
-    return String(Character.toChars(Integer.parseInt(unicode, 16)))
-}
-
-fun traversePreOrder(ast: AST, visit: (ast: AST) -> Unit) {
-    val stack = Stack<AST>()
+fun <T : ITraversable<T>> traversePreOrder(ast: T, visit: (ast: T) -> Unit) {
+    val stack = Stack<T>()
     stack.push(ast)
     while (stack.isNotEmpty()) {
         val node = stack.pop()
@@ -45,10 +30,10 @@ fun traversePreOrder(ast: AST, visit: (ast: AST) -> Unit) {
     }
 }
 
-fun traversePostOrder(ast: AST, visit: (ast: AST) -> Unit) {
-    val stack = Stack<AST>()
+fun <T : ITraversable<T>> traversePostOrder(ast: T, visit: (ast: T) -> Unit) {
+    val stack = Stack<T>()
     stack.push(ast)
-    var lastVisited: AST? = null
+    var lastVisited: T? = null
     while (stack.isNotEmpty()) {
         var lookahead = stack.peek()
         while (true) {
@@ -73,6 +58,31 @@ fun traversePostOrder(ast: AST, visit: (ast: AST) -> Unit) {
     }
 }
 
+fun astToPlantUML(ast: AST): String {
+    val source = StringBuilder()
+    var i = 0
+    source.appendLine("title ${ast.toString()}")
+    traversePreOrder(ast) { node ->
+        node.id = i++
+
+        val stateId = if (node.state != null) "<${node.state!!.id}>" else ""
+        source.appendLine("""state ${node.id} as "${stateId}${node.javaClass.simpleName}"""")
+//        if (node.children.isEmpty())
+        source.appendLine("${node.id}: $node")
+        source.appendLine("${node.id}: ")
+        source.appendLine("${node.id}: first={ ${node.firstSet.joinToString(separator = " , ")} }")
+        source.appendLine("${node.id}: follow={ ${node.followSet.joinToString(separator = " , ")} }")
+//        source.appendLine("${node.id}: indirect-follow={ ${node.indirectFollowSet.joinToString(separator = " , ")} }")
+    }
+
+    traversePostOrder(ast) { node ->
+        for (child in node.children) {
+            source.appendLine("${node.id}-down->${child.id}")
+        }
+    }
+    return source.toString()
+}
+
 fun nfaToPlantUML(nfa: NFA): String {
     val sb = StringBuilder()
     sb.appendLine("hide empty description")
@@ -82,7 +92,7 @@ fun nfaToPlantUML(nfa: NFA): String {
         }
         sb.appendLine("state ${s.id}")
     }
-    for ((s, trans) in nfa.transitionTable) {
+    for ((s, trans) in nfa.tranTable) {
         for (t in trans) {
             sb.appendLine("${if (s == START_STATE) "[*]" else s.id}-down->${if (t.to == ACCEPT_STATE) "[*]" else t.to.id} : ${t.input}")
         }

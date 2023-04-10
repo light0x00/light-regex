@@ -1,7 +1,10 @@
+@file:Suppress("JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE")
+
 package io.github.light0x00.lightregex.lexcical
 
 import io.github.light0x00.lightregex.LightRegexException
-import io.github.light0x00.lightregex.lexcical.IReader
+import io.github.light0x00.lightregex.Unicode
+import io.github.light0x00.lightregex.assertTrue
 import io.github.light0x00.lightregex.readUnexpectedErrorMsg
 import kotlin.math.max
 import kotlin.math.min
@@ -17,25 +20,29 @@ class StringReader(private val str: String) : IReader {
     private var column = 0
     private var idx = 0
 
-    override fun read(): Char? {
+    val codePoints: IntArray = str.codePoints().toArray()
+
+    override fun read(): Int {
         val c = get(idx)
-        if (c == '\n') {
+        if (c == Unicode.LINE_FEED) {
             line++
             column = 0
         } else {
             column++
         }
-        if (c != null)
+        if (c != Unicode.EOF)
             idx++
         return c
     }
 
-    override fun match(vararg expectation: String): String {
+    @Deprecated("暂时无用")
+    fun match(vararg expectation: String): String {
         var matchStr: String? = null
         for (expStr in expectation) {
             var isAllCharsMatch = true
-            for (i in expStr.indices) {
-                if (get(idx + i) != expStr[i]) {
+            var i = 0
+            for (code in expStr.codePoints()) {
+                if (get(idx + i++) != code) {
                     isAllCharsMatch = false
                     break
                 }
@@ -59,8 +66,34 @@ class StringReader(private val str: String) : IReader {
         return matchStr
     }
 
-    override fun peek(): Char? {
-        return this[idx]
+    override fun match(vararg expectation: Int): Int {
+        for (exp in expectation) {
+            if (exp == lookahead()) {
+                return read()
+            }
+        }
+        throw LightRegexException(
+            readUnexpectedErrorMsg(
+                this,
+                expectation.joinToString(
+                    separator = " or",
+                    prefix = "\"",
+                    postfix = "\"",
+                    transform = Character::toString
+                )
+            )
+        )
+    }
+
+    override fun lookahead(n: Int): Int {
+        assertTrue(n > 0)
+        return this[idx + (n - 1)]
+    }
+
+    override fun skip(n: Int) {
+        for (i in 1..n) {
+            read()
+        }
     }
 
     override fun line(): Int {
@@ -87,8 +120,8 @@ class StringReader(private val str: String) : IReader {
         return builder.toString()
     }
 
-    private operator fun get(idx: Int): Char? {
-        return if (idx >= str.length) null else str[idx]
+    private operator fun get(idx: Int): Int {
+        return if (idx >= codePoints.size) Unicode.EOF else codePoints[idx]
     }
 
 }
