@@ -54,7 +54,7 @@ class LexerTest {
                     LiteralToken('.'.code),
                     LiteralToken('*'.code),
                     LiteralToken("🤔".codePointAt(0)),
-                    Token(TokenType.SINGLE_LITERAL_ANY),
+                    Token(TokenType.ANY_LITERAL),
                     Token(TokenType.ANY_TIMES),
                     Token(TokenType.RIGHT_PARENTHESIS)
                 ),
@@ -84,7 +84,7 @@ class LexerTest {
                     LiteralToken('b'.code),
                     LiteralToken("🤔".codePointAt(0)),
                     Token(TokenType.RIGHT_PARENTHESIS),
-                    Token(TokenType.SINGLE_LITERAL_ANY),
+                    Token(TokenType.ANY_LITERAL),
                     Token(TokenType.ANY_TIMES)
                 ),
                 it.asSequence().toList()
@@ -106,7 +106,7 @@ class LexerTest {
                         Token(TokenType.RIGHT_PARENTHESIS),
                         Token(TokenType.ANY_TIMES),
                         LiteralToken('-'.code),
-                        Token(TokenType.SINGLE_LITERAL_ANY),
+                        Token(TokenType.ANY_LITERAL),
                         Token(TokenType.RIGHT_SQUARE_BRACKET),
                     ),
                     it.asSequence().toList()

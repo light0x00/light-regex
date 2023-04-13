@@ -1,6 +1,6 @@
 package io.github.light0x00.lightregex.common
 
-interface Cloneable<T> {
+interface ICloneable<T> {
     fun copy(): T
 }
 

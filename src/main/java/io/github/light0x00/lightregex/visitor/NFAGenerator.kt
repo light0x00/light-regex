@@ -1,10 +1,10 @@
 package io.github.light0x00.lightregex.visitor
 
-import io.github.light0x00.lightregex.ACCEPT_STATE
-import io.github.light0x00.lightregex.NFA
-import io.github.light0x00.lightregex.START_STATE
-import io.github.light0x00.lightregex.Transition
 import io.github.light0x00.lightregex.ast.*
+import io.github.light0x00.lightregex.automata.ACCEPT_STATE
+import io.github.light0x00.lightregex.automata.NFA
+import io.github.light0x00.lightregex.automata.NTransition
+import io.github.light0x00.lightregex.automata.START_STATE
 
 
 /**
@@ -16,7 +16,7 @@ import io.github.light0x00.lightregex.ast.*
  * @author light
  * @since 2023/4/7
  */
-class NFAGenerator(startTran: List<Transition>) : AbstractVisitor() {
+class NFAGenerator(startTran: List<NTransition>) : AbstractVisitor() {
 
     val nfa = NFA(startTran)
     override fun visitRegExpr(ast: RegExpr) {

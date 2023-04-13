@@ -1,7 +1,7 @@
 package io.github.light0x00.lightregex.lexcical
 
-import io.github.light0x00.lightregex.LightRegexException
-import io.github.light0x00.lightregex.readUnexpectedErrorMsg
+import io.github.light0x00.lightregex.common.LightRegexException
+import io.github.light0x00.lightregex.common.readUnexpectedErrorMsg
 import io.github.light0x00.lightregex.ast.Token
 import io.github.light0x00.lightregex.ast.TokenType
 import java.util.*
@@ -36,6 +36,15 @@ interface ILexer : Iterator<Token>, ILocalizable {
 
     fun skip(n: Int = 1)
 
+    fun skipNextIfMatch(type: TokenType): Boolean {
+        return if (lookahead().type == type) {
+            skip()
+            true
+        } else {
+            false
+        }
+    }
+
     override fun hasNext(): Boolean {
         return lookahead() != EOF_TOKEN
     }
@@ -43,9 +52,11 @@ interface ILexer : Iterator<Token>, ILocalizable {
     fun expectNext(vararg expectation: TokenType): Token {
         return next().also {
             if (!expectation.contains(it.type)) {
-                throw LightRegexException(readUnexpectedErrorMsg(this,
-                    expectation.map { it.label }.joinToString(separator = " or ")
-                )
+                throw LightRegexException(
+                    readUnexpectedErrorMsg(
+                        this,
+                        expectation.map { it.label }.joinToString(separator = " or ")
+                    )
                 )
             }
         }

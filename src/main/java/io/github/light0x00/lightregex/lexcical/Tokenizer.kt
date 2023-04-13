@@ -1,10 +1,13 @@
 package io.github.light0x00.lightregex.lexcical
 
-import io.github.light0x00.lightregex.*
 import io.github.light0x00.lightregex.ast.LiteralToken
 import io.github.light0x00.lightregex.ast.RepeatTimesRangeToken
 import io.github.light0x00.lightregex.ast.Token
 import io.github.light0x00.lightregex.ast.TokenType
+import io.github.light0x00.lightregex.common.LightRegexException
+import io.github.light0x00.lightregex.common.Unicode
+import io.github.light0x00.lightregex.common.readErrorMsg
+import io.github.light0x00.lightregex.common.readUnexpectedErrorMsg
 
 /**
  * @author light
@@ -28,11 +31,13 @@ private val SPECIAL_SYMBOL = mapOf(
     Unicode.OR to TokenType.OR,
     Unicode.LEFT_PARENTHESIS to TokenType.LEFT_PARENTHESIS,
     Unicode.RIGHT_PARENTHESIS to TokenType.RIGHT_PARENTHESIS,
-    Unicode.DOT to TokenType.SINGLE_LITERAL_ANY,
+    Unicode.DOT to TokenType.ANY_LITERAL,
     Unicode.LEFT_SQUARE_BRACKET to TokenType.LEFT_SQUARE_BRACKET,
     Unicode.RIGHT_SQUARE_BRACKET to TokenType.RIGHT_SQUARE_BRACKET,
     Unicode.QUESTION_MARK to TokenType.OPTIONAL,
     Unicode.PLUS_SIGN to TokenType.AT_LEAST_ONCE,
+    Unicode.WEDGE to TokenType.START,
+    Unicode.DOLLAR_SIGN to TokenType.END,
 )
 
 val TOKENIZER_SET = sortedSetOf(
@@ -45,7 +50,7 @@ val TOKENIZER_SET = sortedSetOf(
     //转义
     EscapeTokenizer(),
     //处理 {m,n}
-    RepeatRangeTokenizer()
+    RepeatTimesRangeTokenizer()
 )
 
 val TOKENIZER_SET_FOR_SQUARE_BRACKET_EXPR = sortedSetOf(
@@ -136,7 +141,7 @@ private class SingleTokenizer : ITokenizer {
 }
 
 
-private class RepeatRangeTokenizer : ITokenizer {
+private class RepeatTimesRangeTokenizer : ITokenizer {
     override fun support(lookahead: (i: Int) -> Int): Boolean {
         return lookahead(1) == Unicode.LEFT_CURLY_BRACKET
     }

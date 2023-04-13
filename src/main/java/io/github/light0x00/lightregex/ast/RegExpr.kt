@@ -1,6 +1,6 @@
 package io.github.light0x00.lightregex.ast
 
-class RegExpr(expr: AST, accept: Accept) : AST(expr, accept) {
+class RegExpr(expr: AST, accept: Accept, val matchFromStart: Boolean = false) : AST(expr, accept) {
 
     val expr: AST
         get() = this.children[0]

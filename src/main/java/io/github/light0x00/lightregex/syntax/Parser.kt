@@ -1,7 +1,8 @@
 package io.github.light0x00.lightregex.syntax
 
-import io.github.light0x00.lightregex.*
 import io.github.light0x00.lightregex.ast.*
+import io.github.light0x00.lightregex.common.LightRegexException
+import io.github.light0x00.lightregex.common.readErrorMsg
 import io.github.light0x00.lightregex.lexcical.*
 
 //import io.github.light0x00.lightregex.ast.TokenType.*
@@ -33,7 +34,7 @@ and_expr ->
 expr -> and_expr {Follow=(')',EOF)}
 S -> expr EOF
  */
-val AND_EXPR_FOLLOW_SET: Set<TokenType> = setOf(TokenType.EOF, TokenType.RIGHT_PARENTHESIS)
+val AND_EXPR_FOLLOW_SET: Set<TokenType> = setOf(TokenType.END, TokenType.EOF, TokenType.RIGHT_PARENTHESIS)
 
 /**
  * @author light
@@ -71,7 +72,7 @@ class Parser(private val lexer: IDynamicLexer) {
     private fun parsePrimary(): AST {
         val lookahead = lexer.lookahead()
         return when (lookahead.type) {
-            TokenType.SINGLE_LITERAL, TokenType.SINGLE_LITERAL_ANY -> {
+            TokenType.SINGLE_LITERAL, TokenType.ANY_LITERAL -> {
                 lexer.next()
             }
             TokenType.LEFT_PARENTHESIS -> {
@@ -84,7 +85,7 @@ class Parser(private val lexer: IDynamicLexer) {
                 parseSquareBracketExpr()
             }
             else ->
-                throw LightRegexException(readErrorMsg(lexer, """Unrecognized character"""))
+                throw LightRegexException(readErrorMsg(lexer, """Dangling metacharacter: ${lookahead.type}"""))
         }
     }
 
@@ -105,7 +106,7 @@ class Parser(private val lexer: IDynamicLexer) {
         var ast: AST = parsePrimary()
 
         when (lexer.lookahead().type) {
-            TokenType.ANY_TIMES,TokenType.OPTIONAL,TokenType.AT_LEAST_ONCE -> {
+            TokenType.ANY_TIMES, TokenType.OPTIONAL, TokenType.AT_LEAST_ONCE -> {
                 ast = UnaryExpr(ast, lexer.next())
             }
             TokenType.REPEAT_TIMES_RANGE -> {
@@ -158,9 +159,10 @@ class Parser(private val lexer: IDynamicLexer) {
     }
 
     fun parse(): RegExpr {
-        return parseExpr().let {
-            lexer.expectNext(TokenType.EOF)
-            RegExpr(it, Accept())
-        }
+        val matchFromStart = lexer.skipNextIfMatch(TokenType.START)
+        val expr = parseExpr()
+        val matchToEnd = lexer.skipNextIfMatch(TokenType.END)
+        lexer.expectNext(TokenType.EOF)
+        return RegExpr(expr, Accept(matchToEnd), matchFromStart)
     }
 }

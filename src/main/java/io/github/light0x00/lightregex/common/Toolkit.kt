@@ -1,8 +1,10 @@
 @file:JvmName("Toolkit")
 
-package io.github.light0x00.lightregex
+package io.github.light0x00.lightregex.common
 
+import io.github.light0x00.lightregex.*
 import io.github.light0x00.lightregex.ast.AST
+import io.github.light0x00.lightregex.automata.*
 import java.util.*
 import java.util.function.Supplier
 
@@ -30,6 +32,14 @@ fun <T : ITraversable<T>> traversePreOrder(ast: T, visit: (ast: T) -> Unit) {
     }
 }
 
+fun <T> Array<T>.containsIdenticalElement(obj: Any): Boolean {
+    for (i in this) {
+        if (i === obj)
+            return true
+    }
+    return false
+}
+
 fun <T : ITraversable<T>> traversePostOrder(ast: T, visit: (ast: T) -> Unit) {
     val stack = Stack<T>()
     stack.push(ast)
@@ -38,7 +48,7 @@ fun <T : ITraversable<T>> traversePostOrder(ast: T, visit: (ast: T) -> Unit) {
         var lookahead = stack.peek()
         while (true) {
             //子节点已经访问过，说明已经装入，不必重复装入
-            if (lookahead.children.contains(lastVisited)) {
+            if (lastVisited != null && lookahead.children.containsIdenticalElement(lastVisited)) {
                 break
             }
             //倒序装入子节点
@@ -67,12 +77,10 @@ fun astToPlantUML(ast: AST): String {
 
         val stateId = if (node.state != null) "<${node.state!!.id}>" else ""
         source.appendLine("""state ${node.id} as "${stateId}${node.javaClass.simpleName}"""")
-//        if (node.children.isEmpty())
         source.appendLine("${node.id}: $node")
         source.appendLine("${node.id}: ")
         source.appendLine("${node.id}: first={ ${node.firstSet.joinToString(separator = " , ")} }")
         source.appendLine("${node.id}: follow={ ${node.followSet.joinToString(separator = " , ")} }")
-//        source.appendLine("${node.id}: indirect-follow={ ${node.indirectFollowSet.joinToString(separator = " , ")} }")
     }
 
     traversePostOrder(ast) { node ->
@@ -95,6 +103,53 @@ fun nfaToPlantUML(nfa: NFA): String {
     for ((s, trans) in nfa.tranTable) {
         for (t in trans) {
             sb.appendLine("${if (s == START_STATE) "[*]" else s.id}-down->${if (t.to == ACCEPT_STATE) "[*]" else t.to.id} : ${t.input}")
+        }
+    }
+    return sb.toString()
+}
+
+fun dfaToDotLanguage(dfa: DFA): String {
+    val sb = StringBuilder()
+//    sb.appendLine("hide empty description")
+    for (s in dfa.states) {
+        if (s in listOf(D_START_STATE, D_START_STATE)) {
+            continue
+        }
+        sb.appendLine(
+            """${s.id} [label="${s.id}\n${
+                s.nStates.joinToString(
+                    transform = { it.id.toString() },
+                    separator = ","
+                )
+            }"]"""
+        )
+    }
+    for ((s, trans) in dfa.tranTable) {
+        for (t in trans) {
+            sb.appendLine("""${if (s == D_START_STATE) "START" else s.id} -> ${t.to.id} [ label = "${t.input}"]""")
+        }
+    }
+    return sb.toString()
+}
+
+fun dfaToPlantUML(dfa: DFA): String {
+    val sb = StringBuilder()
+    sb.appendLine("hide empty description")
+    for (s in dfa.states) {
+        if (s == D_START_STATE) {
+            continue
+        }
+        sb.appendLine(
+            """state ${s.id}: ${s.nStates.joinToString(separator = ",")}"""
+        )
+    }
+    for ((s, trans) in dfa.tranTable) {
+        for (t in trans) {
+            if (s == D_START_STATE)
+                sb.append("[*]")
+            else
+                sb.append(s.id)
+            sb.appendLine("""-down-> ${t.to.id} : ${t.input} """)
         }
     }
     return sb.toString()

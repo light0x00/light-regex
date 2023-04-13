@@ -3,11 +3,14 @@ package io.github.light0x00.lightregex
 import io.github.light0x00.lightregex.ast.AST
 import io.github.light0x00.lightregex.ast.LiteralToken
 import io.github.light0x00.lightregex.ast.OrExpr
+import io.github.light0x00.lightregex.automata.NTransition
+import io.github.light0x00.lightregex.common.astToPlantUML
+import io.github.light0x00.lightregex.common.traversePostOrder
+import io.github.light0x00.lightregex.common.traversePreOrder
 import io.github.light0x00.lightregex.visitor.FirstSetVisitor
 import io.github.light0x00.lightregex.visitor.FollowSetVisitor
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 /**
@@ -16,6 +19,18 @@ import org.junit.jupiter.api.Test
  */
 class FollowSetVisitorTest {
 
+
+
+    @Test
+    fun testParse() {
+        parseAsAST("(a|[a-c]|[a-z]|[c-g]|.)z")
+            .apply {
+                determineFollowSet(this)
+                println(this)
+                println(astToPlantUML(this))
+//                Assertions.assertEquals("((a(b+))c)", this.toString())
+            }
+    }
 
     @Test
     fun testForCurlyBracketExpr0() {
@@ -55,7 +70,7 @@ class FollowSetVisitorTest {
         (ast.expr.children[0].children[0] as OrExpr)
             .apply {
                 assertThat(
-                    (this.left as LiteralToken).followSet.map(Transition::toString),
+                    (this.left as LiteralToken).followSet.map(NTransition::toString),
                     containsInAnyOrder(
                         "a→1", "b→2", "c→3"
                     )

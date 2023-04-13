@@ -1,4 +1,4 @@
-package io.github.light0x00.lightregex
+package io.github.light0x00.lightregex.common
 
 class Unicode {
 
@@ -20,6 +20,8 @@ class Unicode {
         const val COMMA = ','.code
         const val QUESTION_MARK = '?'.code
         const val PLUS_SIGN = '+'.code
+        const val WEDGE = '^'.code
+        const val DOLLAR_SIGN = '$'.code
 
         /**
          * unicode 最大码点为 0x10FFFF http://www.unicode.org/L2/L2000/00079-n2175.htm

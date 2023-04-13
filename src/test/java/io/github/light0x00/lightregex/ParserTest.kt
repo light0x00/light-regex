@@ -4,6 +4,8 @@ import io.github.light0x00.lightregex.ast.LiteralToken
 import io.github.light0x00.lightregex.ast.RegExpr
 import io.github.light0x00.lightregex.ast.Token
 import io.github.light0x00.lightregex.ast.UnaryExpr
+import io.github.light0x00.lightregex.common.astToPlantUML
+import io.github.light0x00.lightregex.common.traversePostOrder
 import io.github.light0x00.lightregex.lexcical.GeneralLexer
 import io.github.light0x00.lightregex.lexcical.StringReader
 import io.github.light0x00.lightregex.syntax.*
@@ -106,6 +108,21 @@ class ParserTest {
     }
 
     @Test
+    fun testParseCurlyBracket3() {
+        parseAsAST("(a{1,2}){1,2}")
+            .apply {
+
+                traversePostOrder(this) {
+                    println(it)
+                }
+                println(this)
+                println(astToPlantUML(this))
+//                Assertions.assertEquals("(((a|b)((a|b)?))c)", this.toString())
+            }
+    }
+
+
+    @Test
     fun testParseOptional() {
         parseAsAST("ab?c")
             .apply {
@@ -125,4 +142,5 @@ class ParserTest {
                 Assertions.assertEquals("((a(b+))c)", this.toString())
             }
     }
+
 }

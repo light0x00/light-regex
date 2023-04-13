@@ -1,5 +1,10 @@
 package io.github.light0x00.lightregex
 
+import io.github.light0x00.lightregex.automata.NFA
+import io.github.light0x00.lightregex.common.LightRegexException
+import io.github.light0x00.lightregex.common.nfaToPlantUML
+import io.github.light0x00.lightregex.common.traversePostOrder
+import io.github.light0x00.lightregex.common.traversePreOrder
 import io.github.light0x00.lightregex.visitor.FirstSetVisitor
 import io.github.light0x00.lightregex.visitor.FollowSetVisitor
 import io.github.light0x00.lightregex.visitor.NFAGenerator
@@ -13,12 +18,36 @@ import org.junit.jupiter.api.Test
  */
 class NFATest {
 
-
     @Test
-    fun test2() {
-        val nfa = getNFA("a{2,4}bc")
+    fun testEnd() {
+        val nfa = getNFA("(a{1,2}){1,2}$")
         val plantUMLSource = nfaToPlantUML(nfa)
         println(plantUMLSource)
+        assertThat(
+            "",
+            plantUMLSource,
+            Matchers.equalTo(
+                """
+            hide empty description
+            state 1
+            state 2
+            state 3
+            state 4
+            [*]-down->1 : a
+            1-down->2 : a
+            1-down->3 : a
+            1-down->[*] : Any
+            2-down->3 : a
+            2-down->[*] : Any
+            2-down->2 : a
+            3-down->4 : a
+            3-down->[*] : Any
+            4-down->[*] : Any
+            4-down->4 : a
+            
+        """.trimIndent()
+            )
+        )
     }
 
     @Test

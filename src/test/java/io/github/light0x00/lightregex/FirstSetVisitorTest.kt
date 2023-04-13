@@ -1,7 +1,9 @@
 package io.github.light0x00.lightregex
 
+import io.github.light0x00.lightregex.ast.RegExpr
+import io.github.light0x00.lightregex.automata.NTransition
+import io.github.light0x00.lightregex.common.traversePostOrder
 import io.github.light0x00.lightregex.visitor.FirstSetVisitor
-import io.github.light0x00.lightregex.visitor.FollowSetVisitor
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -13,48 +15,35 @@ class FirstSetVisitorTest {
 
     @Test
     fun test1() {
-        val ast = parseAsAST("a|b")
+        val ast = getASTAfterFirst("a|b")
+
+        Assertions.assertIterableEquals(
+            setOf("a→1", "b→2"),
+            ast.firstSet.map(NTransition::toString)
+        )
+
+    }
+
+    private fun getASTAfterFirst(source: String): RegExpr {
+        val ast = parseAsAST(source)
 
         val firstSetVisitor = FirstSetVisitor()
         traversePostOrder(ast) { node ->
             firstSetVisitor.visit(node)
         }
-
-        Assertions.assertIterableEquals(
-            setOf("a→1", "b→2"),
-            ast.firstSet.map(Transition::toString)
-        )
+        return ast
     }
 
     @Test
     fun test2() {
-        val ast = parseAsAST("a*b|c")
-
-        val firstSetVisitor = FirstSetVisitor()
-        traversePostOrder(ast) { node ->
-            firstSetVisitor.visit(node)
-        }
+        val ast = getASTAfterFirst("a*b|c")
 
         Assertions.assertIterableEquals(
             setOf("a→1", "b→2", "c→3"),
-            ast.firstSet.map(Transition::toString)
+            ast.firstSet.map(NTransition::toString)
         )
     }
 
-
-    @Test
-    fun test() {
-        val ast = parseAsAST("(a|b)*ab")
-
-        val firstSetVisitor = FirstSetVisitor()
-        traversePostOrder(ast) { node ->
-            firstSetVisitor.visit(node)
-        }
-        val followSetVisitor = FollowSetVisitor()
-        traversePreOrder(ast) { node ->
-            followSetVisitor.visit(node)
-        }
-    }
 //
 //    class DFAState(val nfaStates: Set<NFAState>, val nfaTran: Map<String?, Set<NFAState>>) {
 //

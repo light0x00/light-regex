@@ -2,10 +2,10 @@
 
 package io.github.light0x00.lightregex.lexcical
 
-import io.github.light0x00.lightregex.LightRegexException
-import io.github.light0x00.lightregex.Unicode
-import io.github.light0x00.lightregex.assertTrue
-import io.github.light0x00.lightregex.readUnexpectedErrorMsg
+import io.github.light0x00.lightregex.common.LightRegexException
+import io.github.light0x00.lightregex.common.Unicode
+import io.github.light0x00.lightregex.common.assertTrue
+import io.github.light0x00.lightregex.common.readUnexpectedErrorMsg
 import kotlin.math.max
 import kotlin.math.min
 

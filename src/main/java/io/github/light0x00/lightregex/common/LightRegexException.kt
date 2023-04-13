@@ -1,4 +1,4 @@
-package io.github.light0x00.lightregex
+package io.github.light0x00.lightregex.common
 
 import io.github.light0x00.lightregex.lexcical.ILocalizable
 

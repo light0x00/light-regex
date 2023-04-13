@@ -1,6 +1,6 @@
 package io.github.light0x00.lightregex.ast
 
-class LiteralRangeToken(val from: Int, val to: Int) : Token(TokenType.SINGLE_LITERAL_RANGE) {
+class LiteralRangeToken(val from: Int, val to: Int) : Token(TokenType.RANGE_LITERAL) {
     override fun toString(): String {
         return "${Character.toString(from)}-${Character.toString(to)}"
     }

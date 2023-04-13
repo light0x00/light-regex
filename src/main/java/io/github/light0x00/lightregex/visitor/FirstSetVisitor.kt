@@ -1,7 +1,8 @@
 package io.github.light0x00.lightregex.visitor
 
-import io.github.light0x00.lightregex.*
 import io.github.light0x00.lightregex.ast.*
+import io.github.light0x00.lightregex.automata.*
+import io.github.light0x00.lightregex.common.LightRegexException
 
 /**
  * @author light
@@ -22,7 +23,10 @@ class FirstSetVisitor : AbstractVisitor() {
     }
 
     override fun visitAccept(ast: Accept) {
-        ast.firstSet = setOf(Transition(EOFInput(), ACCEPT_STATE))
+        val input = if (ast.matchToEnd) EOFInput() else RangeInput(InfiniteRange())
+        ast.firstSet = setOf(
+            NTransition(input, ACCEPT_STATE)
+        )
     }
 
     override fun visitAndExpr(ast: AndExpr) {
@@ -42,11 +46,11 @@ class FirstSetVisitor : AbstractVisitor() {
 
     override fun visitUnaryExpr(ast: UnaryExpr) {
         when (ast.operator.type) {
-            TokenType.ANY_TIMES,TokenType.OPTIONAL -> {
+            TokenType.ANY_TIMES, TokenType.OPTIONAL -> {
                 ast.firstSet = ast.expr.firstSet
                 ast.nullable = true
             }
-            TokenType.AT_LEAST_ONCE-> {
+            TokenType.AT_LEAST_ONCE -> {
                 ast.firstSet = ast.expr.firstSet
             }
             else -> {
@@ -59,17 +63,21 @@ class FirstSetVisitor : AbstractVisitor() {
         val input = when (ast.type) {
             TokenType.SINGLE_LITERAL -> {
                 ast as LiteralToken
-                LiteralInput(ast.lexeme)
+                SingleInput(ast.lexeme)
             }
-            TokenType.SINGLE_LITERAL_ANY -> {
-                AnyInput()
+            TokenType.ANY_LITERAL -> {
+                RangeInput(InfiniteRange())
+            }
+            TokenType.RANGE_LITERAL -> {
+                ast as LiteralRangeToken
+                RangeInput(FiniteRange(ast.from, ast.to))
             }
             else -> {
                 throw LightRegexException("Unknown token type:" + ast.type)
             }
         }
-        ast.state = NFAState(stateId++)
-        ast.firstSet = setOf(Transition(input, ast.state!!))
+        ast.state = NState(stateId++)
+        ast.firstSet = setOf(NTransition(input, ast.state!!))
     }
 
 }
