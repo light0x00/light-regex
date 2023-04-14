@@ -105,30 +105,7 @@ fun nfaToPlantUML(nfa: NFA): String {
             sb.appendLine("${if (s == START_STATE) "[*]" else s.id}-down->${if (t.to == ACCEPT_STATE) "[*]" else t.to.id} : ${t.input}")
         }
     }
-    return sb.toString()
-}
-
-fun dfaToDotLanguage(dfa: DFA): String {
-    val sb = StringBuilder()
-//    sb.appendLine("hide empty description")
-    for (s in dfa.states) {
-        if (s in listOf(D_START_STATE, D_START_STATE)) {
-            continue
-        }
-        sb.appendLine(
-            """${s.id} [label="${s.id}\n${
-                s.nStates.joinToString(
-                    transform = { it.id.toString() },
-                    separator = ","
-                )
-            }"]"""
-        )
-    }
-    for ((s, trans) in dfa.tranTable) {
-        for (t in trans) {
-            sb.appendLine("""${if (s == D_START_STATE) "START" else s.id} -> ${t.to.id} [ label = "${t.input}"]""")
-        }
-    }
+    sb.setLength(sb.length - 1)
     return sb.toString()
 }
 
@@ -152,5 +129,6 @@ fun dfaToPlantUML(dfa: DFA): String {
             sb.appendLine("""-down-> ${t.to.id} : ${t.input} """)
         }
     }
+    sb.setLength(sb.length - 1)
     return sb.toString()
 }

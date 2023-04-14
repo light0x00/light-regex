@@ -85,7 +85,7 @@ class Parser(private val lexer: IDynamicLexer) {
                 parseSquareBracketExpr()
             }
             else ->
-                throw LightRegexException(readErrorMsg(lexer, """Dangling metacharacter: ${lookahead.type}"""))
+                throw LightRegexException(readErrorMsg(lexer, """Unexpected metacharacter: ${lookahead.type}"""))
         }
     }
 

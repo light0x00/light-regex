@@ -1,6 +1,7 @@
 package io.github.light0x00.lightregex.automata
 
 import io.github.light0x00.lightregex.common.LightRegexException
+import io.github.light0x00.lightregex.common.Unicode
 import kotlin.reflect.KClass
 
 /**
@@ -29,7 +30,7 @@ val UNICODE_INT_RANGE_TO_STRING = object : HowIntRangeToString {
     }
 
     override fun intToString(i: Int): String {
-        return Character.toString(i)
+        return Unicode.toString(i)
     }
 }
 
@@ -97,7 +98,7 @@ data class RightInfiniteRange(val start: Int) : IIntRange {
     }
 }
 
-val map2 =
+private val RANGE_OPERATION_IMPLEMENTS =
     mapOf<Pair<KClass<out IIntRange>, KClass<out IIntRange>>, (r1: IIntRange, r2: IIntRange) -> Triple<List<IIntRange>, List<IIntRange>, List<IIntRange>>>(
         FiniteRange::class to FiniteRange::class to { r1, r2 ->
             diffFor_Finite_Finite(r1 as FiniteRange, r2 as FiniteRange)
@@ -157,84 +158,16 @@ fun swapDiff(diff: Triple<List<IIntRange>, List<IIntRange>, List<IIntRange>>): T
     return Triple(diff.second, diff.first, diff.third)
 }
 
-val map =
-    mutableMapOf<KClass<out IIntRange>, Map<KClass<out IIntRange>, (r1: IIntRange, r2: IIntRange) -> Triple<List<IIntRange>, List<IIntRange>, List<IIntRange>>>>(
-        InfiniteRange::class to mapOf(InfiniteRange::class to { r1, r2 ->
-            Triple(
-                emptyList(),
-                emptyList(),
-                emptyList()
-            )
-        })
-    )
-
-
 /**
  * @return 1：范围1有范围2没有 2：范围2有范围1没有 3：共有
  */
 fun diff(range1: IIntRange, range2: IIntRange): Triple<List<IIntRange>, List<IIntRange>, List<IIntRange>> {
-    val fn = map2[range1::class to range2::class]
+    val fn = RANGE_OPERATION_IMPLEMENTS[range1::class to range2::class]
         ?: throw LightRegexException("Unsupported operation:${range1::class} and ${range2::class}")
     return fn(range1, range2)
-//    return when {
-//        range1 is FiniteRange -> {
-//            when (range2) {
-//                is FiniteRange -> {
-//                    diffFor_Finite_Finite(range1, range2)
-//                }
-//                is InfiniteRange -> {
-//                    diffFor_Finite_Infinite(range1, range2)
-//                }
-//                is LeftInfiniteRange -> {
-//                    diffFor_LeftInfinite_Finite(range1, range2)
-//                }
-//                is RightInfiniteRange -> {
-//                    diffForFiniteRightInfinite(range1, range2)
-//                }
-//                else -> {
-//                    throw LightRegexException("Unsupported Range operation:${range1.javaClass} with ${range2.javaClass}")
-//                }
-//            }
-//        }
-//        range1 is InfiniteRange -> {
-//            when (range2) {
-//                is FiniteRange -> {
-//                    diffFor_Finite_Infinite(range2).let {
-//                        Triple(it.second, it.first, it.third)
-//                    }
-//                }
-//                is InfiniteRange -> {
-//                    diffFor_Infinite_Infinite(range1, range2)
-//                    diffFor_Finite_Infinite(range1)
-//                }
-//                is LeftInfiniteRange -> {
-//                    diffFor_LeftInfinite_Finite(range1, range2)
-//                }
-//                is RightInfiniteRange -> {
-//                    diffForFiniteRightInfinite(range1, range2)
-//                }
-//                else -> {
-//                    throw LightRegexException("Unsupported Range operation:${range1.javaClass} with ${range2.javaClass}")
-//                }
-//            }
-//        }
-//        range1 is LeftInfiniteRange -> {
-//
-//        }
-//        range1 is RightInfiniteRange -> {
-//
-//        }
-//        else -> {
-////            if (range2 is FiniteRange) {
-////                return diff(range2, range1).let {
-////                    Triple(it.second, it.first, it.third)
-////                }
-////            }
-//            throw LightRegexException("Unsupported Range operation:${range1.javaClass} with ${range2.javaClass}")
-//        }
-//    }
 }
 
+@Suppress("UNUSED_PARAMETER")
 private fun diffFor_Infinite_LeftInfinite(
     range1: InfiniteRange,
     range2: LeftInfiniteRange
@@ -246,6 +179,7 @@ private fun diffFor_Infinite_LeftInfinite(
     )
 }
 
+@Suppress("UNUSED_PARAMETER")
 private fun diffFor_Infinite_RightInfinite(
     range1: InfiniteRange,
     range2: RightInfiniteRange
@@ -370,6 +304,7 @@ private fun diffFor_LeftInfinite_LeftInfinite(
     }
 }
 
+@Suppress("UNUSED_PARAMETER")
 fun diffFor_Infinite_Infinite(
     range1: InfiniteRange,
     range2: InfiniteRange
@@ -381,6 +316,7 @@ fun diffFor_Infinite_Infinite(
  * 有限 Range 与 无限 Range 的差异
  * @return 1: 前者有后者没有 2: 后者有前者没有 3: 交集
  */
+@Suppress("UNUSED_PARAMETER")
 private fun diffFor_Finite_Infinite(
     range1: FiniteRange,
     range2: InfiniteRange
@@ -486,9 +422,9 @@ private fun diffForFiniteRightInfinite(
             )
         } else {
             /*
-              ┌──────────────────►
-  ────────────┴───┬────────┬──────
-                 s1
+                      ┌──────────────────►
+          ────────────┴───┬────────┬──────
+                         s1
              */
             return Triple(
                 emptyList(),

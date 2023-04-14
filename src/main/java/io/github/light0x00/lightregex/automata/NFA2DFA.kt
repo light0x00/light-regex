@@ -18,7 +18,7 @@ fun nfa2Dfa(nfa: NFA): DFA {
 
     do {
         val dState = stack.pop()
-        val nTrans = dState.nStates.flatMap { nfa.tranTable.get(it) ?: emptyList<NTransition>() }
+        val nTrans = dState.nStates.flatMap { nfa.tranTable.get(it) ?: emptyList() }
         val dTrans = nTransToDTrans(nTrans)
 
         for (dTran in dTrans) {

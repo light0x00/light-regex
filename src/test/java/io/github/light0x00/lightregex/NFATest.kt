@@ -28,23 +28,20 @@ class NFATest {
             plantUMLSource,
             Matchers.equalTo(
                 """
-            hide empty description
-            state 1
-            state 2
-            state 3
-            state 4
-            [*]-down->1 : a
-            1-down->2 : a
-            1-down->3 : a
-            1-down->[*] : Any
-            2-down->3 : a
-            2-down->[*] : Any
-            2-down->2 : a
-            3-down->4 : a
-            3-down->[*] : Any
-            4-down->[*] : Any
-            4-down->4 : a
-            
+                hide empty description
+                state 1
+                state 2
+                state 3
+                state 4
+                [*]-down->1 : a
+                1-down->2 : a
+                1-down->3 : a
+                1-down->[*] : EOF
+                2-down->3 : a
+                2-down->[*] : EOF
+                3-down->4 : a
+                3-down->[*] : EOF
+                4-down->[*] : EOF
         """.trimIndent()
             )
         )
@@ -72,8 +69,7 @@ class NFATest {
                 2-down->1 : a
                 2-down->2 : b
                 3-down->4 : b
-                4-down->[*] : EOF
-                
+                4-down->[*] : ∞
             """.trimIndent()
             )
         )

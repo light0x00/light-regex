@@ -10,6 +10,5 @@ abstract class AST(override vararg val children: AST) : ITraversable<AST>, IClon
     var state: NState? = null
     var firstSet: Set<NTransition> = emptySet()
     var followSet: Set<NTransition> = emptySet()
-//    var indirectFollowSet: Set<Transition> = emptySet()
     var nullable: Boolean = false
 }

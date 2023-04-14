@@ -29,6 +29,14 @@ class Unicode {
          */
         const val EOF = Int.MAX_VALUE
 
+        fun toString(code: Int): String {
+            return if (code == EOF) {
+                "EOF"
+            } else {
+                Character.toString(code)
+            }
+        }
+
         fun isValidUnicode(code: Int): Boolean {
             return code in 0..0x10FFFF;
         }
