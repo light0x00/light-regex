@@ -1,5 +1,5 @@
 @file:Suppress("JAVA_MODULE_DOES_NOT_EXPORT_PACKAGE")
-@file:JvmName("LightRegex")
+//@file:JvmName("LightRegex")
 
 package io.github.light0x00.lightregex
 
@@ -97,4 +97,5 @@ fun astToNFA(ast: RegExpr): NFA {
     return nfaGenerator.nfa
 }
 
+@Suppress("NOTHING_TO_INLINE")
 inline fun nfaToDFA(nfa: NFA): DFA = nfa2Dfa(nfa)
