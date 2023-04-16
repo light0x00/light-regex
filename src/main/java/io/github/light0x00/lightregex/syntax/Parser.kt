@@ -2,6 +2,7 @@ package io.github.light0x00.lightregex.syntax
 
 import io.github.light0x00.lightregex.ast.*
 import io.github.light0x00.lightregex.common.LightRegexException
+import io.github.light0x00.lightregex.common.Unicode
 import io.github.light0x00.lightregex.common.readErrorMsg
 import io.github.light0x00.lightregex.lexcical.*
 
@@ -43,16 +44,43 @@ val AND_EXPR_FOLLOW_SET: Set<TokenType> = setOf(TokenType.END, TokenType.EOF, To
 
 class Parser(private val lexer: IDynamicLexer) {
 
+    private fun parseShorthand(): AST {
+        val token = lexer.expectNext(TokenType.SHORTHAND_SYMBOL)
+        token as ShorthandToken
+        return when (token.symbol) {
+            's'.code -> {
+                SingleToken(Unicode.SPACE)
+            }
+            'w'.code -> {
+                OrExpr(
+                    OrExpr(LiteralRangeToken(0x41, 0x51), LiteralRangeToken(0x61, 0x7a)),
+                    LiteralRangeToken(0x30, 0x39)
+                )
+            }
+            'd'.code -> {
+                LiteralRangeToken(0x30, 0x39)
+            }
+            else -> {
+                throw LightRegexException("Unrecognized shorthand:$token")
+            }
+        }
+    }
+
     private fun parseRangeLiteral(): AST {
-        val literal = lexer.expectNext(TokenType.SINGLE_LITERAL)
-        literal as LiteralToken
+        //中括号表达式内可以存在 速记符号 [\wa-z]
+        if (lexer.lookahead().type == TokenType.SHORTHAND_SYMBOL) {
+            return parseShorthand()
+        }
+        var literal = lexer.expectNext(TokenType.SINGLE_LITERAL)
+        literal as SingleToken
         if (lexer.lookahead().type == TokenType.HYPHEN) {
             lexer.skip() //消耗掉 -
             val literal2 = lexer.expectNext(TokenType.SINGLE_LITERAL)
-            literal2 as LiteralToken
-            return LiteralRangeToken(literal.lexeme, literal2.lexeme)
+            literal2 as SingleToken
+            literal = LiteralRangeToken(literal.lexeme, literal2.lexeme)
         }
         return literal
+
     }
 
     private fun parseSquareBracketExpr(): AST {
@@ -75,15 +103,22 @@ class Parser(private val lexer: IDynamicLexer) {
             TokenType.SINGLE_LITERAL, TokenType.ANY_LITERAL -> {
                 lexer.next()
             }
+
             TokenType.LEFT_PARENTHESIS -> {
                 lexer.skip()
                 val ast = parseExpr()
                 lexer.expectNext(TokenType.RIGHT_PARENTHESIS)
                 ast
             }
+
             TokenType.LEFT_SQUARE_BRACKET -> {
                 parseSquareBracketExpr()
             }
+
+            TokenType.SHORTHAND_SYMBOL -> {
+                parseShorthand()
+            }
+
             else ->
                 throw LightRegexException(readErrorMsg(lexer, """Unexpected metacharacter: ${lookahead.type}"""))
         }
@@ -96,6 +131,7 @@ class Parser(private val lexer: IDynamicLexer) {
             TokenType.ANY_TIMES, TokenType.REPEAT_TIMES_RANGE -> {
                 ast = UnaryExpr(ast, lexer.next())
             }
+
             else -> {
             }
         }
@@ -109,6 +145,7 @@ class Parser(private val lexer: IDynamicLexer) {
             TokenType.ANY_TIMES, TokenType.OPTIONAL, TokenType.AT_LEAST_ONCE -> {
                 ast = UnaryExpr(ast, lexer.next())
             }
+
             TokenType.REPEAT_TIMES_RANGE -> {
                 val operator = lexer.next() as RepeatTimesRangeToken
                 val toCopy = ast;
@@ -123,6 +160,7 @@ class Parser(private val lexer: IDynamicLexer) {
                     }
                 }
             }
+
             else -> {
             }
         }
@@ -136,6 +174,7 @@ class Parser(private val lexer: IDynamicLexer) {
                 lexer.skip() //消耗掉 '|'
                 OrExpr(ast, parseOrExpr())
             }
+
             else -> {
                 ast
             }

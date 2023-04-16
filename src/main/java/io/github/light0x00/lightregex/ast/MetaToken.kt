@@ -1,6 +1,10 @@
 package io.github.light0x00.lightregex.ast
 
-open class Token(val type: TokenType) : AST() {
+abstract class AbstractToken(val type: TokenType) : AST() {
+
+}
+
+open class Token(type: TokenType) : AbstractToken(type) {
 
     override fun toString(): String {
         return type.label

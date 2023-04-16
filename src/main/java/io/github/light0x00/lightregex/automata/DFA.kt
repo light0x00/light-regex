@@ -24,6 +24,8 @@ class DFAState(var id: Int? = null, val nStates: Set<NState>) {
 
     constructor(nfaStates: Set<NState>) : this(null, nfaStates)
 
+    fun isAccept():Boolean = nStates.contains(ACCEPT_STATE)
+
     override fun equals(other: Any?): Boolean {
         return other is DFAState && other.nStates == nStates
     }

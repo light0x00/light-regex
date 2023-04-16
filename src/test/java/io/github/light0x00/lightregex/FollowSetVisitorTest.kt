@@ -1,7 +1,7 @@
 package io.github.light0x00.lightregex
 
 import io.github.light0x00.lightregex.ast.AST
-import io.github.light0x00.lightregex.ast.LiteralToken
+import io.github.light0x00.lightregex.ast.SingleToken
 import io.github.light0x00.lightregex.ast.OrExpr
 import io.github.light0x00.lightregex.automata.NTransition
 import io.github.light0x00.lightregex.common.astToPlantUML
@@ -70,7 +70,7 @@ class FollowSetVisitorTest {
         (ast.expr.children[0].children[0] as OrExpr)
             .apply {
                 assertThat(
-                    (this.left as LiteralToken).followSet.map(NTransition::toString),
+                    (this.left as SingleToken).followSet.map(NTransition::toString),
                     containsInAnyOrder(
                         "a→1", "b→2", "c→3"
                     )

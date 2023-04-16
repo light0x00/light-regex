@@ -1,6 +1,6 @@
 package io.github.light0x00.lightregex
 
-import io.github.light0x00.lightregex.ast.LiteralToken
+import io.github.light0x00.lightregex.ast.SingleToken
 import io.github.light0x00.lightregex.ast.RepeatTimesRangeToken
 import io.github.light0x00.lightregex.ast.Token
 import io.github.light0x00.lightregex.ast.TokenType
@@ -22,7 +22,7 @@ class LexerTest {
     fun testUnicode() {
         getLexer("""\u{1F914}""").also {
             Assertions.assertIterableEquals(
-                listOf(LiteralToken("🤔".codePointAt(0))),
+                listOf(SingleToken("🤔".codePointAt(0))),
                 it.asSequence().toList()
             )
         }
@@ -33,9 +33,9 @@ class LexerTest {
         getLexer("""a🤔c""").also {
             Assertions.assertIterableEquals(
                 listOf(
-                    LiteralToken('a'.code),
-                    LiteralToken("🤔".codePointAt(0)),
-                    LiteralToken('c'.code),
+                    SingleToken('a'.code),
+                    SingleToken("🤔".codePointAt(0)),
+                    SingleToken('c'.code),
                 ),
                 it.asSequence().toList()
             )
@@ -48,12 +48,12 @@ class LexerTest {
             Assertions.assertIterableEquals(
                 listOf(
                     Token(TokenType.LEFT_PARENTHESIS),
-                    LiteralToken('('.code),
-                    LiteralToken('a'.code),
-                    LiteralToken('\\'.code),
-                    LiteralToken('.'.code),
-                    LiteralToken('*'.code),
-                    LiteralToken("🤔".codePointAt(0)),
+                    SingleToken('('.code),
+                    SingleToken('a'.code),
+                    SingleToken('\\'.code),
+                    SingleToken('.'.code),
+                    SingleToken('*'.code),
+                    SingleToken("🤔".codePointAt(0)),
                     Token(TokenType.ANY_LITERAL),
                     Token(TokenType.ANY_TIMES),
                     Token(TokenType.RIGHT_PARENTHESIS)
@@ -67,7 +67,7 @@ class LexerTest {
     fun testPredict() {
         getLexer("""\u{0000}|a""")
             .also {
-                Assertions.assertEquals(LiteralToken('a'.code), it.lookahead(3))
+                Assertions.assertEquals(SingleToken('a'.code), it.lookahead(3))
             }
     }
 
@@ -79,10 +79,10 @@ class LexerTest {
             Assertions.assertIterableEquals(
                 listOf(
                     Token(TokenType.LEFT_PARENTHESIS),
-                    LiteralToken('a'.code),
-                    LiteralToken('|'.code),
-                    LiteralToken('b'.code),
-                    LiteralToken("🤔".codePointAt(0)),
+                    SingleToken('a'.code),
+                    SingleToken('|'.code),
+                    SingleToken('b'.code),
+                    SingleToken("🤔".codePointAt(0)),
                     Token(TokenType.RIGHT_PARENTHESIS),
                     Token(TokenType.ANY_LITERAL),
                     Token(TokenType.ANY_TIMES)
@@ -100,12 +100,12 @@ class LexerTest {
                     listOf(
                         Token(TokenType.LEFT_SQUARE_BRACKET),
                         Token(TokenType.LEFT_PARENTHESIS),
-                        LiteralToken('a'.code),
+                        SingleToken('a'.code),
                         Token(TokenType.OR),
-                        LiteralToken('b'.code),
+                        SingleToken('b'.code),
                         Token(TokenType.RIGHT_PARENTHESIS),
                         Token(TokenType.ANY_TIMES),
-                        LiteralToken('-'.code),
+                        SingleToken('-'.code),
                         Token(TokenType.ANY_LITERAL),
                         Token(TokenType.RIGHT_SQUARE_BRACKET),
                     ),
@@ -122,14 +122,14 @@ class LexerTest {
                 Assertions.assertIterableEquals(
                     listOf(
                         Token(TokenType.LEFT_SQUARE_BRACKET),
-                        LiteralToken('('.code),
-                        LiteralToken('a'.code),
-                        LiteralToken('|'.code),
-                        LiteralToken('b'.code),
-                        LiteralToken(')'.code),
-                        LiteralToken('*'.code),
+                        SingleToken('('.code),
+                        SingleToken('a'.code),
+                        SingleToken('|'.code),
+                        SingleToken('b'.code),
+                        SingleToken(')'.code),
+                        SingleToken('*'.code),
                         Token(TokenType.HYPHEN),
-                        LiteralToken('.'.code),
+                        SingleToken('.'.code),
                         Token(TokenType.RIGHT_SQUARE_BRACKET),
                     ),
                     it.asSequence().toList()
@@ -142,11 +142,11 @@ class LexerTest {
         getLexer("a{2}b{1,3}c{2,}").also {
             Assertions.assertIterableEquals(
                 listOf(
-                    LiteralToken('a'.code),
+                    SingleToken('a'.code),
                     RepeatTimesRangeToken(2),
-                    LiteralToken('b'.code),
+                    SingleToken('b'.code),
                     RepeatTimesRangeToken(1, 3),
-                    LiteralToken('c'.code),
+                    SingleToken('c'.code),
                     RepeatTimesRangeToken(2, infinite = true)
                 ),
                 it.asSequence().toList()

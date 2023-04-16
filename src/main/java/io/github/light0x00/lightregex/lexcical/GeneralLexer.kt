@@ -35,7 +35,6 @@ class GeneralLexer(
         return lookaheads[n - 1]
     }
 
-
     override fun skip(n: Int) {
         for (i in 1..n) {
             next()

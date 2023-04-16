@@ -22,6 +22,7 @@ class Unicode {
         const val PLUS_SIGN = '+'.code
         const val WEDGE = '^'.code
         const val DOLLAR_SIGN = '$'.code
+        const val SPACE = ' '.code
 
         /**
          * unicode 最大码点为 0x10FFFF http://www.unicode.org/L2/L2000/00079-n2175.htm

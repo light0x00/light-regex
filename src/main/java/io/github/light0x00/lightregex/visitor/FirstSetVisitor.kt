@@ -62,7 +62,7 @@ class FirstSetVisitor : AbstractVisitor() {
     override fun visitToken(ast: Token) {
         val input = when (ast.type) {
             TokenType.SINGLE_LITERAL -> {
-                ast as LiteralToken
+                ast as SingleToken
                 SingleInput(ast.lexeme)
             }
             TokenType.ANY_LITERAL -> {

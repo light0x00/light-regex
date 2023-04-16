@@ -1,11 +1,12 @@
 package io.github.light0x00.lightregex.ast
 
+import io.github.light0x00.lightregex.common.Unicode
 import java.util.*
 
-data class LiteralToken(val lexeme: Int) : Token(TokenType.SINGLE_LITERAL) {
+class SingleToken(val lexeme: Int) : Token(TokenType.SINGLE_LITERAL) {
     override fun equals(other: Any?): Boolean {
         return when (other) {
-            is LiteralToken -> lexeme == other.lexeme
+            is SingleToken -> lexeme == other.lexeme
             else -> false
         }
     }
@@ -15,10 +16,10 @@ data class LiteralToken(val lexeme: Int) : Token(TokenType.SINGLE_LITERAL) {
     }
 
     override fun toString(): String {
-        return Character.toString(lexeme)
+        return Unicode.toString(lexeme)
     }
 
-    override fun copy(): LiteralToken {
-        return LiteralToken(lexeme)
+    override fun copy(): SingleToken {
+        return SingleToken(lexeme)
     }
 }

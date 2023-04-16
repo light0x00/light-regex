@@ -1,6 +1,6 @@
 package io.github.light0x00.lightregex
 
-import io.github.light0x00.lightregex.ast.LiteralToken
+import io.github.light0x00.lightregex.ast.SingleToken
 import io.github.light0x00.lightregex.ast.RegExpr
 import io.github.light0x00.lightregex.ast.Token
 import io.github.light0x00.lightregex.ast.UnaryExpr
@@ -28,7 +28,7 @@ class ParserTest {
         parseAsAST("a")
             .also {
                 (it.expr as Token).apply {
-                    Assertions.assertEquals(LiteralToken('a'.code), this)
+                    Assertions.assertEquals(SingleToken('a'.code), this)
                 }
             }
     }

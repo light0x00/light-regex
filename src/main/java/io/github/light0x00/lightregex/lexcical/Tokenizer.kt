@@ -1,9 +1,6 @@
 package io.github.light0x00.lightregex.lexcical
 
-import io.github.light0x00.lightregex.ast.LiteralToken
-import io.github.light0x00.lightregex.ast.RepeatTimesRangeToken
-import io.github.light0x00.lightregex.ast.Token
-import io.github.light0x00.lightregex.ast.TokenType
+import io.github.light0x00.lightregex.ast.*
 import io.github.light0x00.lightregex.common.LightRegexException
 import io.github.light0x00.lightregex.common.Unicode
 import io.github.light0x00.lightregex.common.readErrorMsg
@@ -41,7 +38,7 @@ private val SPECIAL_SYMBOL = mapOf(
 )
 
 val TOKENIZER_SET = sortedSetOf(
-    //转义
+    //转义 unicode
     UnicodeEscapeTokenizer(),
     //匹配字符
     SingleTokenizer(),
@@ -66,7 +63,6 @@ val TOKENIZER_SET_FOR_SQUARE_BRACKET_EXPR = sortedSetOf(
 
 interface ITokenizer : Comparable<ITokenizer> {
     val precedence: Int
-        get() = 0
 
     fun support(lookahead: (i: Int) -> Int): Boolean
     fun tokenize(reader: IReader): Token
@@ -76,7 +72,7 @@ interface ITokenizer : Comparable<ITokenizer> {
     }
 }
 
-private class UnicodeEscapeTokenizer : ITokenizer {
+private class UnicodeEscapeTokenizer(override val precedence: Int = 0) : ITokenizer {
 
     override fun support(lookahead: (Int) -> Int): Boolean {
         return lookahead(1) == Unicode.LEFT_SLASH && lookahead(2) == 'u'.code
@@ -97,7 +93,7 @@ private class UnicodeEscapeTokenizer : ITokenizer {
         if (!Unicode.isValidUnicode(code)) {
             throw LightRegexException(readErrorMsg(reader, "Invalid Unicode code-point:$code"))
         }
-        return LiteralToken(code)
+        return SingleToken(code)
     }
 }
 
@@ -112,11 +108,20 @@ class EscapeTokenizer : ITokenizer {
 
     override fun tokenize(reader: IReader): Token {
         reader.skip()
-        return LiteralToken(reader.read())
+        return when (val code = reader.read()) {
+            's'.code, 'w'.code, 'd'.code -> {
+                ShorthandToken(code)
+            }
+
+            else -> {
+                SingleToken(code)
+            }
+        }
     }
 }
 
-class SpecialSymbolTokenizer(val symbolTable: Map<Int, TokenType>) : ITokenizer {
+class SpecialSymbolTokenizer(private val symbolTable: Map<Int, TokenType>, override val precedence: Int = 0) :
+    ITokenizer {
 
     override fun support(lookahead: (Int) -> Int): Boolean {
         return symbolTable.contains(lookahead(1))
@@ -127,21 +132,20 @@ class SpecialSymbolTokenizer(val symbolTable: Map<Int, TokenType>) : ITokenizer 
     }
 }
 
-private class SingleTokenizer : ITokenizer {
-    override val precedence: Int
-        get() = Int.MIN_VALUE
+private class SingleTokenizer(override val precedence: Int = Integer.MIN_VALUE) : ITokenizer {
+
 
     override fun support(lookahead: (Int) -> Int): Boolean {
         return lookahead(1) != Unicode.EOF
     }
 
     override fun tokenize(reader: IReader): Token {
-        return LiteralToken(reader.read())
+        return SingleToken(reader.read())
     }
 }
 
 
-private class RepeatTimesRangeTokenizer : ITokenizer {
+private class RepeatTimesRangeTokenizer(override val precedence: Int = 0) : ITokenizer {
     override fun support(lookahead: (i: Int) -> Int): Boolean {
         return lookahead(1) == Unicode.LEFT_CURLY_BRACKET
     }
