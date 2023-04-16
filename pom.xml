@@ -6,7 +6,7 @@
 
     <groupId>io.github.light0x00</groupId>
     <artifactId>light-regex</artifactId>
-    <version>0.0.1-alpha</version>
+    <version>0.0.1-beta</version>
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -112,6 +112,7 @@
                 <version>1.8.10</version>
                 <executions>
                     <execution>
+                        <!--编译阶段 执行这个 goal 生成 javadoc.jar-->
                         <phase>compile</phase>
                         <goals>
                             <goal>javadocJar</goal>

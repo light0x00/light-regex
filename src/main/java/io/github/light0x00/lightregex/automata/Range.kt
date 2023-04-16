@@ -149,7 +149,7 @@ private val RANGE_OPERATION_IMPLEMENTS =
             swapDiff(diffFor_LeftInfinite_RightInfinite(r2 as LeftInfiniteRange, r1 as RightInfiniteRange))
         },
         Pair(RightInfiniteRange::class, RightInfiniteRange::class) to { r1, r2 ->
-            diffForRightRightInfinite(r1 as RightInfiniteRange, r2 as RightInfiniteRange)
+            diffForRightInfiniteRightInfinite(r1 as RightInfiniteRange, r2 as RightInfiniteRange)
         },
 
         )
@@ -192,7 +192,7 @@ private fun diffFor_Infinite_RightInfinite(
 }
 
 
-private fun diffForRightRightInfinite(
+private fun diffForRightInfiniteRightInfinite(
     range1: RightInfiniteRange,
     range2: RightInfiniteRange
 ): Triple<List<IIntRange>, List<IIntRange>, List<IIntRange>> {
@@ -440,11 +440,21 @@ private fun diffFor_Finite_Finite(
     range2: FiniteRange
 ): Triple<List<FiniteRange>, List<FiniteRange>, List<FiniteRange>> {
     if (range1.start < range2.start) {
-        //没有交集
+        /*
+        没有交集
+                        ┌────r2───┐
+        ──┬─────────┬───┴─────────┴──
+          └────r1───┘
+        */
         if (range1.end < range2.start) {
             return Triple(listOf(range1), listOf(range2), emptyList())
         }
-        //相交 互有非空差集
+        /*
+        相交 互有非空差集
+                   ┌───r2───┐
+        ────┬──────┴──┬─────┴────────
+            └────r1───┘
+        */
         else if (range1.end < range2.end) {
             return Triple(
                 listOf(FiniteRange(range1.start, range2.start - 1)),
@@ -452,7 +462,12 @@ private fun diffFor_Finite_Finite(
                 listOf(FiniteRange(range2.start, range1.end))
             )
         }
-        //range1 包含 range2,存在左侧差集空间
+        /*
+        range1 包含 range2,存在左侧差集空间
+                                   ┌────r2───┐
+                        ───────┬───┴─────────┼─────
+                               └──────r1─────┘
+        */
         else if (range1.end == range2.end) {
             return Triple(
                 listOf(FiniteRange(range1.start, range2.start - 1)),
@@ -461,6 +476,11 @@ private fun diffFor_Finite_Finite(
             )
         }
         //range1 包含 range2,存在左侧、右侧差集空间
+        /*
+                           ┌────r2───┐
+                ───────┬───┴─────────┴──┬──────
+                       └──────r1────────┘
+           */
         else {
             return Triple(
                 listOf(FiniteRange(range1.start, range2.start - 1), FiniteRange(range2.end + 1, range1.end)),
@@ -469,7 +489,12 @@ private fun diffFor_Finite_Finite(
             )
         }
     } else if (range1.start == range2.start) {
-        //range1 被 range2 包含，存在右侧差集空间
+        /*
+        range1 被 range2 包含，存在右侧差集空间
+                           ┌───────r2────┐
+                ───────────┼──────────┬──┴────
+                           └───r1─────┘
+        */
         if (range1.end < range2.end) {
             return Triple(
                 listOf(),
@@ -477,11 +502,22 @@ private fun diffFor_Finite_Finite(
                 listOf(range1)
             )
         }
-        //range1 与 range2 重合
+        /*
+        range1 与 range2 重合
+                   ┌──────r2─────┐
+          ─────────┼─────────────┼───────────
+                   └──────r1─────┘
+        */
         else if (range1.end == range2.end) {
             return Triple(emptyList(), emptyList(), listOf(range1))
         }
-        //range1 包含 range2，存在右侧差集空间
+        //
+        /*
+        range1 包含 range2，存在右侧差集空间
+                   ┌──────r2─────┐
+          ─────────┼─────────────┴───┬──────────
+                   └────────r1───────┘
+        */
         else {
             return Triple(
                 listOf(FiniteRange(range2.end + 1, range1.end)),
@@ -490,7 +526,12 @@ private fun diffFor_Finite_Finite(
             )
         }
     } else if (range1.start <= range2.end) {
-        //range1 被 range2 包含，存在左侧、右侧差集空间
+        /*
+        range1 被 range2 包含，存在左侧、右侧差集空间
+                   ┌──────r2─────┐
+          ─────────┴─┬─────────┬─┴───────────
+                     └────r1───┘
+        */
         if (range1.end < range2.end) {
             return Triple(
                 emptyList(),
@@ -498,7 +539,12 @@ private fun diffFor_Finite_Finite(
                 listOf(range1)
             )
         }
-        //range1 被 range2 包含，存在左侧差集空间
+        /*
+        range1 被 range2 包含，存在左侧差集空间
+                   ┌──────r2─────┐
+          ─────────┴───┬─────────┼───────────
+                       └────r1───┘
+        */
         else if (range1.end == range2.end) {
             return Triple(
                 emptyList(),
@@ -506,7 +552,12 @@ private fun diffFor_Finite_Finite(
                 listOf(range1)
             )
         }
-        //range1 range2 相交，前者对后者有右侧差集空间，后者对前者有左侧差集空间
+        /*
+        range1 range2 相交，前者对后者有右侧差集空间，后者对前者有左侧差集空间
+                   ┌──────r2─────┐
+          ─────────┴───┬─────────┴──┬────────
+                       └────r1──────┘
+        */
         else {
             return Triple(
                 listOf(FiniteRange(range2.end + 1, range1.end)),
@@ -516,6 +567,12 @@ private fun diffFor_Finite_Finite(
         }
     }
     //range1 在 range2 的右侧
+    /*
+     没有交集
+       ┌────r2───┐
+     ──┴─────────┴────┬─────────┬───
+                      └────r1───┘
+     */
     else {
         return Triple(
             listOf(range1),
