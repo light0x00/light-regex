@@ -1,6 +1,5 @@
 package io.github.light0x00.lightregex.visitor
 
-import io.github.light0x00.lightregex.*
 import io.github.light0x00.lightregex.ast.*
 import io.github.light0x00.lightregex.common.LightRegexException
 
@@ -53,7 +52,7 @@ class FollowSetVisitor : AbstractVisitor() {
         }
     }
 
-    override fun visitToken(ast: Token) {
+    override fun visitToken(ast: AbstractToken) {
 //        nfa.addTrans(ast.state!!, ast.followSet.toList())
     }
 

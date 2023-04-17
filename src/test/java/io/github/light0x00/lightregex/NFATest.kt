@@ -1,8 +1,7 @@
 package io.github.light0x00.lightregex
 
+import io.github.light0x00.lightregex.RegexVisualizer.Companion.nfaToPlantUML
 import io.github.light0x00.lightregex.automata.NFA
-import io.github.light0x00.lightregex.common.LightRegexException
-import io.github.light0x00.lightregex.common.nfaToPlantUML
 import io.github.light0x00.lightregex.common.traversePostOrder
 import io.github.light0x00.lightregex.common.traversePreOrder
 import io.github.light0x00.lightregex.visitor.FirstSetVisitor

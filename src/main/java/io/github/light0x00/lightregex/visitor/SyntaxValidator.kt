@@ -23,6 +23,6 @@ class SyntaxValidator : AbstractVisitor() {
     override fun visitUnaryExpr(ast: UnaryExpr) {
     }
 
-    override fun visitToken(ast: Token) {
+    override fun visitToken(ast: AbstractToken) {
     }
 }

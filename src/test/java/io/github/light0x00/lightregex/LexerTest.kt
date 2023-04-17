@@ -2,7 +2,7 @@ package io.github.light0x00.lightregex
 
 import io.github.light0x00.lightregex.ast.SingleToken
 import io.github.light0x00.lightregex.ast.RepeatTimesRangeToken
-import io.github.light0x00.lightregex.ast.Token
+import io.github.light0x00.lightregex.ast.MetaToken
 import io.github.light0x00.lightregex.ast.TokenType
 import io.github.light0x00.lightregex.lexcical.*
 import org.junit.jupiter.api.Assertions
@@ -47,16 +47,16 @@ class LexerTest {
         getLexer("""(\(\a\\\.\*\u{1F914}.*)""").also {
             Assertions.assertIterableEquals(
                 listOf(
-                    Token(TokenType.LEFT_PARENTHESIS),
+                    MetaToken(TokenType.LEFT_PARENTHESIS),
                     SingleToken('('.code),
                     SingleToken('a'.code),
                     SingleToken('\\'.code),
                     SingleToken('.'.code),
                     SingleToken('*'.code),
                     SingleToken("🤔".codePointAt(0)),
-                    Token(TokenType.ANY_LITERAL),
-                    Token(TokenType.ANY_TIMES),
-                    Token(TokenType.RIGHT_PARENTHESIS)
+                    MetaToken(TokenType.ANY_LITERAL),
+                    MetaToken(TokenType.ANY_TIMES),
+                    MetaToken(TokenType.RIGHT_PARENTHESIS)
                 ),
                 it.asSequence().toList()
             )
@@ -78,14 +78,14 @@ class LexerTest {
         ).also {
             Assertions.assertIterableEquals(
                 listOf(
-                    Token(TokenType.LEFT_PARENTHESIS),
+                    MetaToken(TokenType.LEFT_PARENTHESIS),
                     SingleToken('a'.code),
                     SingleToken('|'.code),
                     SingleToken('b'.code),
                     SingleToken("🤔".codePointAt(0)),
-                    Token(TokenType.RIGHT_PARENTHESIS),
-                    Token(TokenType.ANY_LITERAL),
-                    Token(TokenType.ANY_TIMES)
+                    MetaToken(TokenType.RIGHT_PARENTHESIS),
+                    MetaToken(TokenType.ANY_LITERAL),
+                    MetaToken(TokenType.ANY_TIMES)
                 ),
                 it.asSequence().toList()
             )
@@ -98,16 +98,16 @@ class LexerTest {
             .also {
                 Assertions.assertIterableEquals(
                     listOf(
-                        Token(TokenType.LEFT_SQUARE_BRACKET),
-                        Token(TokenType.LEFT_PARENTHESIS),
+                        MetaToken(TokenType.LEFT_SQUARE_BRACKET),
+                        MetaToken(TokenType.LEFT_PARENTHESIS),
                         SingleToken('a'.code),
-                        Token(TokenType.OR),
+                        MetaToken(TokenType.OR),
                         SingleToken('b'.code),
-                        Token(TokenType.RIGHT_PARENTHESIS),
-                        Token(TokenType.ANY_TIMES),
+                        MetaToken(TokenType.RIGHT_PARENTHESIS),
+                        MetaToken(TokenType.ANY_TIMES),
                         SingleToken('-'.code),
-                        Token(TokenType.ANY_LITERAL),
-                        Token(TokenType.RIGHT_SQUARE_BRACKET),
+                        MetaToken(TokenType.ANY_LITERAL),
+                        MetaToken(TokenType.RIGHT_SQUARE_BRACKET),
                     ),
                     it.asSequence().toList()
                 )
@@ -121,16 +121,16 @@ class LexerTest {
                 it.switchTokenizers(TOKENIZER_SET_FOR_SQUARE_BRACKET_EXPR)
                 Assertions.assertIterableEquals(
                     listOf(
-                        Token(TokenType.LEFT_SQUARE_BRACKET),
+                        MetaToken(TokenType.LEFT_SQUARE_BRACKET),
                         SingleToken('('.code),
                         SingleToken('a'.code),
                         SingleToken('|'.code),
                         SingleToken('b'.code),
                         SingleToken(')'.code),
                         SingleToken('*'.code),
-                        Token(TokenType.HYPHEN),
+                        MetaToken(TokenType.HYPHEN),
                         SingleToken('.'.code),
-                        Token(TokenType.RIGHT_SQUARE_BRACKET),
+                        MetaToken(TokenType.RIGHT_SQUARE_BRACKET),
                     ),
                     it.asSequence().toList()
                 )

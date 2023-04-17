@@ -3,7 +3,7 @@ package io.github.light0x00.lightregex.ast
 import java.util.*
 
 class RepeatTimesRangeToken(val min: Int, val max: Int = min, val infinite: Boolean = false) :
-    Token(TokenType.REPEAT_TIMES_RANGE) {
+    AbstractToken(TokenType.REPEAT_TIMES_RANGE) {
 
     override fun toString(): String {
         return if (infinite) {

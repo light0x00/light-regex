@@ -1,10 +1,11 @@
 package io.github.light0x00.lightregex.lexcical
 
+import io.github.light0x00.lightregex.ast.AbstractToken
 import io.github.light0x00.lightregex.common.LightRegexException
 import io.github.light0x00.lightregex.common.Unicode
 import io.github.light0x00.lightregex.common.assertTrue
 import io.github.light0x00.lightregex.common.readErrorMsg
-import io.github.light0x00.lightregex.ast.Token
+import io.github.light0x00.lightregex.ast.MetaToken
 import java.util.*
 
 /**
@@ -17,7 +18,7 @@ class GeneralLexer(
 ) : IDynamicLexer,
     ILocalizable by reader {
 
-    private val lookaheads = LinkedList<Token>()
+    private val lookaheads = LinkedList<AbstractToken>()
 
     override fun switchTokenizers(newTokenizers: SortedSet<ITokenizer>): SortedSet<ITokenizer> {
         val old = tokenizers
@@ -25,7 +26,7 @@ class GeneralLexer(
         return old
     }
 
-    override fun lookahead(n: Int): Token {
+    override fun lookahead(n: Int): AbstractToken {
         assertTrue(n > 0)
         if (lookaheads.size < n) {
             for (i in 1..n - lookaheads.size) {
@@ -41,11 +42,11 @@ class GeneralLexer(
         }
     }
 
-    override fun next(): Token {
+    override fun next(): AbstractToken {
         return if (lookaheads.isEmpty()) tokenize() else lookaheads.poll()
     }
 
-    private fun tokenize(): Token {
+    private fun tokenize(): AbstractToken {
         val lookahead = reader.lookahead()
         if (lookahead == Unicode.EOF) {
             return EOF_TOKEN

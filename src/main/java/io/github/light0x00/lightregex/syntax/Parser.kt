@@ -129,7 +129,7 @@ class Parser(private val lexer: IDynamicLexer) {
 
         when (lexer.lookahead().type) {
             TokenType.ANY_TIMES, TokenType.REPEAT_TIMES_RANGE -> {
-                ast = UnaryExpr(ast, lexer.next())
+                ast = UnaryExpr(ast, lexer.next() as MetaToken)
             }
 
             else -> {
@@ -143,7 +143,7 @@ class Parser(private val lexer: IDynamicLexer) {
 
         when (lexer.lookahead().type) {
             TokenType.ANY_TIMES, TokenType.OPTIONAL, TokenType.AT_LEAST_ONCE -> {
-                ast = UnaryExpr(ast, lexer.next())
+                ast = UnaryExpr(ast, lexer.next() as MetaToken)
             }
 
             TokenType.REPEAT_TIMES_RANGE -> {
@@ -153,10 +153,10 @@ class Parser(private val lexer: IDynamicLexer) {
                     ast = AndExpr(ast, toCopy.copy())
                 }
                 if (operator.infinite) {
-                    ast = AndExpr(ast, UnaryExpr(toCopy.copy(), Token(TokenType.ANY_TIMES)))
+                    ast = AndExpr(ast, UnaryExpr(toCopy.copy(), MetaToken(TokenType.ANY_TIMES)))
                 } else {
                     for (i in 1..operator.max - operator.min) {
-                        ast = AndExpr(ast, UnaryExpr(toCopy.copy(), Token(TokenType.OPTIONAL)))
+                        ast = AndExpr(ast, UnaryExpr(toCopy.copy(), MetaToken(TokenType.OPTIONAL)))
                     }
                 }
             }

@@ -65,7 +65,7 @@ interface ITokenizer : Comparable<ITokenizer> {
     val precedence: Int
 
     fun support(lookahead: (i: Int) -> Int): Boolean
-    fun tokenize(reader: IReader): Token
+    fun tokenize(reader: IReader): AbstractToken
 
     override fun compareTo(other: ITokenizer): Int {
         return if (other.precedence > this.precedence) 1 else -1
@@ -78,7 +78,7 @@ private class UnicodeEscapeTokenizer(override val precedence: Int = 0) : ITokeni
         return lookahead(1) == Unicode.LEFT_SLASH && lookahead(2) == 'u'.code
     }
 
-    override fun tokenize(reader: IReader): Token {
+    override fun tokenize(reader: IReader): AbstractToken {
         reader.skip(2) //消耗掉 '\','u'
         reader.match('{'.code) //消耗掉 '{'
         val unicode = StringBuilder(4)
@@ -106,7 +106,7 @@ class EscapeTokenizer : ITokenizer {
         return lookahead(1) == Unicode.LEFT_SLASH
     }
 
-    override fun tokenize(reader: IReader): Token {
+    override fun tokenize(reader: IReader): AbstractToken {
         reader.skip()
         return when (val code = reader.read()) {
             's'.code, 'w'.code, 'd'.code -> {
@@ -127,8 +127,8 @@ class SpecialSymbolTokenizer(private val symbolTable: Map<Int, TokenType>, overr
         return symbolTable.contains(lookahead(1))
     }
 
-    override fun tokenize(reader: IReader): Token {
-        return Token(symbolTable[reader.read()]!!)
+    override fun tokenize(reader: IReader): AbstractToken {
+        return MetaToken(symbolTable[reader.read()]!!)
     }
 }
 
@@ -139,7 +139,7 @@ private class SingleTokenizer(override val precedence: Int = Integer.MIN_VALUE) 
         return lookahead(1) != Unicode.EOF
     }
 
-    override fun tokenize(reader: IReader): Token {
+    override fun tokenize(reader: IReader): AbstractToken {
         return SingleToken(reader.read())
     }
 }
@@ -151,7 +151,7 @@ private class RepeatTimesRangeTokenizer(override val precedence: Int = 0) : ITok
     }
 
 
-    override fun tokenize(reader: IReader): Token {
+    override fun tokenize(reader: IReader): AbstractToken {
         reader.skip()
         //m
         val min = readDigit(reader) ?: throw LightRegexException(readUnexpectedErrorMsg(reader, "digit"))

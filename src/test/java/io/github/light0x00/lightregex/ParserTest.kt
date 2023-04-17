@@ -1,10 +1,9 @@
 package io.github.light0x00.lightregex
 
+import io.github.light0x00.lightregex.RegexVisualizer.Companion.astToPlantUML
 import io.github.light0x00.lightregex.ast.SingleToken
 import io.github.light0x00.lightregex.ast.RegExpr
-import io.github.light0x00.lightregex.ast.Token
 import io.github.light0x00.lightregex.ast.UnaryExpr
-import io.github.light0x00.lightregex.common.astToPlantUML
 import io.github.light0x00.lightregex.common.traversePostOrder
 import io.github.light0x00.lightregex.lexcical.GeneralLexer
 import io.github.light0x00.lightregex.lexcical.StringReader
@@ -27,7 +26,7 @@ class ParserTest {
     fun testParsePrimaryExpr() {
         parseAsAST("a")
             .also {
-                (it.expr as Token).apply {
+                (it.expr as SingleToken).apply {
                     Assertions.assertEquals(SingleToken('a'.code), this)
                 }
             }

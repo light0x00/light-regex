@@ -1,10 +1,10 @@
 package io.github.light0x00.lightregex
 
+import io.github.light0x00.lightregex.RegexVisualizer.Companion.astToPlantUML
 import io.github.light0x00.lightregex.ast.AST
 import io.github.light0x00.lightregex.ast.SingleToken
 import io.github.light0x00.lightregex.ast.OrExpr
 import io.github.light0x00.lightregex.automata.NTransition
-import io.github.light0x00.lightregex.common.astToPlantUML
 import io.github.light0x00.lightregex.common.traversePostOrder
 import io.github.light0x00.lightregex.common.traversePreOrder
 import io.github.light0x00.lightregex.visitor.FirstSetVisitor

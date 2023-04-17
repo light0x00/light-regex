@@ -1,7 +1,7 @@
 package io.github.light0x00.lightregex
 
+import io.github.light0x00.lightregex.RegexVisualizer.Companion.nfaToPlantUML
 import io.github.light0x00.lightregex.automata.*
-import io.github.light0x00.lightregex.common.nfaToPlantUML
 import org.junit.jupiter.api.Test
 
 /**

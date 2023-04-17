@@ -1,12 +1,13 @@
 package io.github.light0x00.lightregex.lexcical
 
+import io.github.light0x00.lightregex.ast.AbstractToken
+import io.github.light0x00.lightregex.ast.MetaToken
 import io.github.light0x00.lightregex.common.LightRegexException
 import io.github.light0x00.lightregex.common.readUnexpectedErrorMsg
-import io.github.light0x00.lightregex.ast.Token
 import io.github.light0x00.lightregex.ast.TokenType
 import java.util.*
 
-val EOF_TOKEN = Token(TokenType.EOF)
+val EOF_TOKEN = MetaToken(TokenType.EOF)
 
 /*
  * 需要可切换分词器的能力的原因在于：
@@ -30,9 +31,9 @@ interface IDynamicLexer : ILexer {
  * @author light
  * @since 2023/3/29
  */
-interface ILexer : Iterator<Token>, ILocalizable {
+interface ILexer : Iterator<AbstractToken>, ILocalizable {
 
-    fun lookahead(n: Int = 1): Token
+    fun lookahead(n: Int = 1): AbstractToken
 
     fun skip(n: Int = 1)
 
@@ -49,7 +50,7 @@ interface ILexer : Iterator<Token>, ILocalizable {
         return lookahead() != EOF_TOKEN
     }
 
-    fun expectNext(vararg expectation: TokenType): Token {
+    fun expectNext(vararg expectation: TokenType): AbstractToken {
         return next().also {
             if (!expectation.contains(it.type)) {
                 throw LightRegexException(

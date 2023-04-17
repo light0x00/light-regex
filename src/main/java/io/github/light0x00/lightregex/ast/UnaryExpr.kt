@@ -1,6 +1,6 @@
 package io.github.light0x00.lightregex.ast
 
-class UnaryExpr(expr: AST, val operator: Token) : AST(expr) {
+class UnaryExpr(expr: AST, val operator: MetaToken) : AST(expr) {
     val expr: AST
         get() = this.children[0]
 

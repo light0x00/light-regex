@@ -3,7 +3,7 @@ package io.github.light0x00.lightregex.ast
 import io.github.light0x00.lightregex.common.Unicode
 import java.util.*
 
-class SingleToken(val lexeme: Int) : Token(TokenType.SINGLE_LITERAL) {
+class SingleToken(val lexeme: Int) : AbstractToken(TokenType.SINGLE_LITERAL) {
     override fun equals(other: Any?): Boolean {
         return when (other) {
             is SingleToken -> lexeme == other.lexeme

@@ -1,8 +1,6 @@
 package io.github.light0x00.lightregex
 
 import org.junit.jupiter.api.Test
-import java.util.stream.Stream
-import javax.xml.stream.events.Characters
 
 /**
  * @author light
@@ -52,24 +50,69 @@ class LightRegexTest {
         }
     }
 
-}
+    @Test
+    fun testMatchFromStart() {
+        val str = "Kotlin is an elegant language"
 
-fun main2() {
+        val regex = LightRegex("^Kotlin[\\w\\s]+")
+        val range = regex.match(str, eager = true)
 
-    val input = "abbabb"
+        if (range != null)
+            println("Match found:" + str.substring(range.first, range.endInclusive + 1))
+    }
 
-    val regex = LightRegex("(a|b)+abb")
-    val matches = regex.matchAll(input)
+    @Test
+    fun testMatchToEnd() {
 
-    println(if (matches.isNotEmpty()) "Match Found" else "Match Not Found")
+        val regex = LightRegex("[\\w\\s]+language$")
 
-    for (match in matches) {
-        println(input.substring(match.first, match.last + 1) + ",at index ${match.first}~${match.last}")
+        //match 1
+        val str = "Kotlin is an elegant language"
+        val range = regex.match(str, eager = true)
+
+        if (range != null)
+            println("Match found: " + str.substring(range.first, range.endInclusive + 1))
+        else
+            println("Match not found")
+
+
+        //match 2
+        val str2 = "Kotlin is an elegant language,but lack of Union Type like Typescript"
+        val range2 = regex.match(str2, eager = true)
+
+        if (range2 != null)
+            println("Match found:" + str2.substring(range2.first, range2.endInclusive + 1))
+        else
+            println("Match not found")
+    }
+
+    @Test
+    fun usage() {
+        val regex = LightRegex("to be[\\w,\\s]{1,}to be")
+
+        val input = "to be, or not to be, that's the question"
+
+        val range = regex.match(input)
+
+        if (range != null) {
+            println("Matched")
+            println(input.substring(range.start, range.endInclusive + 1))
+        } else {
+            println("Not matched")
+        }
+    }
+
+    @Test
+    fun printAST_NFA_DFA(){
+        val ast = RegexSupport.parseAsAST("^(a|b)*abb$")
+        val nfa = RegexSupport.astToNFA(ast)
+        val dfa = RegexSupport.nfaToDFA(nfa)
+
+        println(RegexVisualizer.nfaToPlantUML(nfa))
+        println()
+        println(RegexVisualizer.dfaToPlantUML(dfa))
+        println()
+        println(RegexVisualizer.astToPlantUML(ast))
     }
 }
 
-fun getter() = sequence {
-    for (i in Stream.of(1, 3, 5, 7)) {
-        yield(i)
-    }
-}

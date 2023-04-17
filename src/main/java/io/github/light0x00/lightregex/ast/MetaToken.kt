@@ -4,7 +4,7 @@ abstract class AbstractToken(val type: TokenType) : AST() {
 
 }
 
-open class Token(type: TokenType) : AbstractToken(type) {
+open class MetaToken(type: TokenType) : AbstractToken(type) {
 
     override fun toString(): String {
         return type.label
@@ -12,7 +12,7 @@ open class Token(type: TokenType) : AbstractToken(type) {
 
     override fun equals(other: Any?): Boolean {
         return when (other) {
-            is Token -> type == other.type
+            is MetaToken -> type == other.type
             else -> false
         }
     }
@@ -21,7 +21,7 @@ open class Token(type: TokenType) : AbstractToken(type) {
         return type.hashCode()
     }
 
-    override fun copy(): Token {
-        return Token(type)
+    override fun copy(): MetaToken {
+        return MetaToken(type)
     }
 }

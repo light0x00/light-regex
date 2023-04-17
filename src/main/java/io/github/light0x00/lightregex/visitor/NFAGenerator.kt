@@ -37,7 +37,7 @@ class NFAGenerator(startTran: List<NTransition>) : AbstractVisitor() {
 
     }
 
-    override fun visitToken(ast: Token) {
+    override fun visitToken(ast: AbstractToken) {
         nfa.addTrans(ast.state!!, ast.followSet.toList())
     }
 

@@ -1,6 +1,5 @@
 package io.github.light0x00.lightregex.visitor
 
-import io.github.light0x00.lightregex.*
 import io.github.light0x00.lightregex.ast.*
 import io.github.light0x00.lightregex.common.LightRegexException
 
@@ -15,7 +14,7 @@ abstract class AbstractVisitor : IVisitor {
 
     protected fun dispatchToVisit(ast: AST) {
         when (ast) {
-            is Token -> {
+            is AbstractToken -> {
                 visitToken(ast)
             }
             is AndExpr -> {
@@ -49,7 +48,7 @@ abstract class AbstractVisitor : IVisitor {
 
     protected abstract fun visitUnaryExpr(ast: UnaryExpr)
 
-    protected abstract fun visitToken(ast: Token)
+    protected abstract fun visitToken(ast: AbstractToken)
 
 
 }
