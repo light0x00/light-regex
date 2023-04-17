@@ -1,0 +1,20 @@
+@startuml
+hide empty description
+title DFA of (a|b)*abb$
+state 5: Accept
+state 2: 2
+state 1: 1,3
+state 3: 2,4
+state 4: 2,5
+[*]-down-> 1 : a
+[*]-down-> 2 : b
+2-down-> 1 : a
+2-down-> 2 : b
+1-down-> 1 : a
+1-down-> 3 : b
+3-down-> 1 : a
+3-down-> 4 : b
+4-down-> 1 : a
+4-down-> 2 : b
+4-down-> 5 : EOF
+@enduml

@@ -11,9 +11,9 @@ A regular expression engine implementation. In addition to the baisc functionali
 
 ```xml
 <dependency>
-		<groupId>io.github.light0x00</groupId>
-		<artifactId>light-regex</artifactId>
-		<version>0.0.1-beta</version>
+    <groupId>io.github.light0x00</groupId>
+    <artifactId>light-regex</artifactId>
+    <version>0.0.1</version>
 </dependency>
 ```
 
@@ -43,7 +43,7 @@ to be, or not to be
 
 ## Features
 
-##### Shorthand Character Classes
+### Shorthand Character Classes
 
 Frequently-used range matching, such as decimal and word, can be represented by shorhand notations `\d` ,`\w` respectively . Additionally, space can be represented `\s`.
 
@@ -53,7 +53,7 @@ The following matches one or more words or space.
 val regex = LightRegex("[\\w\\s]+")
 ```
 
-##### Repetition operator
+### Repetition operator
 
 To specify the repeatition times for a character or a character range like `[a-z]`, or a parentheses expression like `(a|b|[0-9])` , use the following operator :
 
@@ -64,7 +64,21 @@ To specify the repeatition times for a character or a character range like `[a-z
 - `{m}` repeat exactly `m` times
 - `{m,}` repeat `m` or more times
 
-##### Range matching
+The following match a string containing 2 to 4  "a" or "b" :
+
+```kotlin
+val regex = LightRegex("(a|b){2,4}$")
+
+println(regex.match("aa")!=null) //true
+println(regex.match("ab")!=null) //true
+println(regex.match("abab")!=null) //true
+
+println(regex.match("aaaaa")!=null) //false
+println(regex.match("bbbbb")!=null) //false
+println(regex.match("ababa")!=null) //false
+```
+
+### Range matching
 
 Range matching like `[a-d]` and `[abcd]` are supported. The former means to match a character in the  range of Unicode code point between `0x61-0x64` , and the latter means to match a character that is one of the letters `a`,`b`,`c`,`d`
 
@@ -77,7 +91,7 @@ val regex = LightRegex("[a-zA-Z0-9\\s]") //can also be written in [\w\s]
 val matches = regex.matchAll(str)
 
 for (m in matches) {
-		print(str.substring(m.start, m.endInclusive + 1))
+	print(str.substring(m.start, m.endInclusive + 1))
 }
 /*
 =========output=========
@@ -96,7 +110,7 @@ val regex = LightRegex("[\\u{1F600}-\\u{1F644}]")
 val matches = regex.matchAll(str)
 
 for (m in matches) {
-		println(str.substring(m.start, m.endInclusive + 1))
+	println(str.substring(m.start, m.endInclusive + 1))
 }
 /*
 =========output=========
@@ -107,7 +121,7 @@ for (m in matches) {
 */
 ```
 
-##### Anchors
+### Anchors
 
 To specify matching from the start or to the end of a input sequecne, use `^`, `$` respectively.
 
@@ -121,9 +135,9 @@ val str = "Kotlin is an elegant language"
 val range = regex.match(str, eager = true)
 
 if (range != null)
-		println("Match found: "+str.substring(range.first, range.endInclusive + 1))
+	println("Match found: "+str.substring(range.first, range.endInclusive + 1))
 else
-		println("Match not found")
+	println("Match not found")
 /*
 =========output=========
 Match found: Kotlin is an elegant language
@@ -135,9 +149,9 @@ val str2 = "Kotlin is an elegant language,but lack of Union Type like Typescript
 val range2 = regex.match(str2, eager = true)
 
 if (range2 != null)
-		println("Match found:"+str2.substring(range2.first, range2.endInclusive + 1))
+	println("Match found:"+str2.substring(range2.first, range2.endInclusive + 1))
 else
-		println("Match not found")
+	println("Match not found")
 
 /*
 =========output=========
@@ -150,157 +164,19 @@ Match not found
 
 Given a pattern `(a|b)*abb$`, it firstly be parsed as a AST(Abstract syntax tree), as shown below:
 
-
-```plantuml
-hide empty description
-title AST of (a|b)*abb$
-state 0 as "RegExpr"
-0: (((((a|b)*)a)b)b)
-state 1 as "AndExpr"
-1: (((((a|b)*)a)b)b)
-state 2 as "AndExpr"
-2: ((((a|b)*)a)b)
-state 3 as "AndExpr"
-3: (((a|b)*)a)
-state 4 as "UnaryExpr"
-4: ((a|b)*)
-state 5 as "OrExpr"
-5: (a|b)
-state 6 as "SingleToken"
-6: a
-state 7 as "SingleToken"
-7: b
-state 8 as "SingleToken"
-8: a
-state 9 as "SingleToken"
-9: b
-state 10 as "SingleToken"
-10: b
-state 11 as "Accept"
-11: 
-5-down->6
-5-down->7
-4-down->5
-3-down->4
-3-down->8
-2-down->3
-2-down->9
-1-down->2
-1-down->10
-0-down->1
-0-down->11
-```
+![alternative text](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/light0x00/light-regex/master/doc/ast.plantuml)
 
 Whereafter, determine the first set and follow set for each leaf node. In term of Compiler Principle, the leaf nodes of AST named `Terminal`. Each terminal (leaf node) is a NFA state. In the following diagram we mark each terminal with a interger identifier, which corrsponeding to a NFA state the latter will mention.
 
-```plantuml
-hide empty description
-title AST of (a|b)*abb$ with first set and follow set
-state 0 as "RegExpr"
-0: (((((a|b)*)a)b)b)
-0: first={ a→1 , b→2 , a→3 }
-state 1 as "AndExpr"
-1: (((((a|b)*)a)b)b)
-1: first={ a→1 , b→2 , a→3 }
-1: follow={ EOF→Accept }
-state 2 as "AndExpr"
-2: ((((a|b)*)a)b)
-2: first={ a→1 , b→2 , a→3 }
-2: follow={ b→5 }
-state 3 as "AndExpr"
-3: (((a|b)*)a)
-3: first={ a→1 , b→2 , a→3 }
-3: follow={ b→4 }
-state 4 as "UnaryExpr"
-4: ((a|b)*)
-4: first={ a→1 , b→2 }
-4: follow={ a→3 }
-state 5 as "OrExpr"
-5: (a|b)
-5: first={ a→1 , b→2 }
-5: follow={ a→3 , a→1 , b→2 }
-state 6 as "<1>SingleToken"
-6: a
-6: first={ a→1 }
-6: follow={ a→3 , a→1 , b→2 }
-state 7 as "<2>SingleToken"
-7: b
-7: first={ b→2 }
-7: follow={ a→3 , a→1 , b→2 }
-state 8 as "<3>SingleToken"
-8: a
-8: first={ a→3 }
-8: follow={ b→4 }
-state 9 as "<4>SingleToken"
-9: b
-9: first={ b→4 }
-9: follow={ b→5 }
-state 10 as "<5>SingleToken"
-10: b
-10: first={ b→5 }
-10: follow={ EOF→Accept }
-state 11 as "Accept"
-11: 
-11: first={ EOF→Accept }
-5-down->6
-5-down->7
-4-down->5
-3-down->4
-3-down->8
-2-down->3
-2-down->9
-1-down->2
-1-down->10
-0-down->1
-0-down->11
-```
+![alternative text](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/light0x00/light-regex/master/doc/ast_with_first_follow.plantuml)
 
 According to the first set, follow set, we have known that given a state, what input can reach it, and what input on it can reach the next state. Therefore, we got the following NFA:
 
-```plantuml
-hide empty description
-title NFA of (a|b)*abb$
-state 1
-state 2
-state 3
-state 4
-state 5
-[*]-down->1 : a
-[*]-down->2 : b
-[*]-down->3 : a
-1-down->3 : a
-1-down->1 : a
-1-down->2 : b
-2-down->3 : a
-2-down->1 : a
-2-down->2 : b
-3-down->4 : b
-4-down->5 : b
-5-down->[*] : ∞
-```
+![alternative text](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/light0x00/light-regex/master/doc/nfa.plantuml)
 
 In the end, we use the well-known Subset Construction Algorithem ,to convert the NFA to the DFA. As shown below, each DFA state contains a set of NFA states.
 
-```plantuml
-hide empty description
-title DFA of (a|b)*abb$
-state 5: Accept
-state 2: 2
-state 1: 1,3
-state 3: 2,4
-state 4: 2,5
-[*]-down-> 1 : a 
-[*]-down-> 2 : b 
-2-down-> 1 : a 
-2-down-> 2 : b 
-1-down-> 1 : a 
-1-down-> 3 : b 
-3-down-> 1 : a 
-3-down-> 4 : b 
-4-down-> 1 : a 
-4-down-> 2 : b 
-4-down-> 5 : EOF 
-```
+![alternative text](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/light0x00/light-regex/master/doc/dfa.plantuml)
 
 ## Underlying API
 

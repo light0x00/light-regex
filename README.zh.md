@@ -10,9 +10,9 @@ Central](https://maven-badges.herokuapp.com/maven-central/io.github.light0x00/li
 
 ```xml
 <dependency>
-		<groupId>io.github.light0x00</groupId>
-		<artifactId>light-regex</artifactId>
-		<version>0.0.1-beta</version>
+    <groupId>io.github.light0x00</groupId>
+    <artifactId>light-regex</artifactId>
+    <version>0.0.1</version>
 </dependency>
 ```
 
@@ -34,7 +34,7 @@ val result = regex.match(input)
 ```kotlin
 println(input.substring(result.start, result.endInclusive + 1))
 /*
-=========output=========
+=========输出=========
 Matched
 to be, or not to be
 */
@@ -42,7 +42,7 @@ to be, or not to be
 
 ## 特性
 
-##### 助记符
+### 助记符
 
 - \d 代表 `[0-9]`
 - \w 代表 `[a-zA-Z0-9]`
@@ -54,7 +54,7 @@ to be, or not to be
 val regex = LightRegex("[\\w\\s]+")
 ```
 
-##### 重复操作符
+### 重复操作符
 
 - `?`	重复0次或1次
 - `*` 重复0次或多次
@@ -63,7 +63,23 @@ val regex = LightRegex("[\\w\\s]+")
 - `{m}` repeat exactly `m` times
 - `{m,}` repeat `m` or more times
 
-##### 范围匹配
+The following match a string containing 2 to 4  "a" or "b"
+
+下面的例子匹配一个由 2 到 4 个 "a" 或 "b" 构成的字符串:
+
+```kotlin
+val regex = LightRegex("(a|b){2,4}$")
+
+println(regex.match("aa")!=null) //true
+println(regex.match("ab")!=null) //true
+println(regex.match("abab")!=null) //true
+
+println(regex.match("aaaaa")!=null) //false
+println(regex.match("bbbbb")!=null) //false
+println(regex.match("ababa")!=null) //false
+```
+
+### 范围匹配
 
 支持字面量范围 `[a-d]` , `[abcd]` 的范围匹配, 也支持直接基于 unicode 码点(code point) 的范围匹配, 写作 `[\u{0x0000}-\u{0xFFFF}]`
 
@@ -76,7 +92,7 @@ val regex = LightRegex("[a-zA-Z0-9\\s]") //也可以写作 [\w\s]
 val matches = regex.matchAll(str)
 
 for (m in matches) {
-		print(str.substring(m.start, m.endInclusive + 1))
+	print(str.substring(m.start, m.endInclusive + 1))
 }
 /*
 =========输出=========
@@ -93,7 +109,7 @@ val regex = LightRegex("[\\u{1F600}-\\u{1F644}]")
 val matches = regex.matchAll(str)
 
 for (m in matches) {
-		println(str.substring(m.start, m.endInclusive + 1))
+	println(str.substring(m.start, m.endInclusive + 1))
 }
 /*
 =========输出=========
@@ -104,7 +120,7 @@ for (m in matches) {
 */
 ```
 
-##### 锚点
+### 锚点
 
 - `^` 表示从输入序列的第一个字符开始匹配
 - `$` 表示匹配到输入序列的最后一个字符
@@ -114,156 +130,19 @@ for (m in matches) {
 给定一个正则表达式 `(a|b)*abb$`, 它首先被解析为抽象语法树,如下所示:
 
 
-```plantuml
-hide empty description
-title AST of (a|b)*abb$
-state 0 as "RegExpr"
-0: (((((a|b)*)a)b)b)
-state 1 as "AndExpr"
-1: (((((a|b)*)a)b)b)
-state 2 as "AndExpr"
-2: ((((a|b)*)a)b)
-state 3 as "AndExpr"
-3: (((a|b)*)a)
-state 4 as "UnaryExpr"
-4: ((a|b)*)
-state 5 as "OrExpr"
-5: (a|b)
-state 6 as "SingleToken"
-6: a
-state 7 as "SingleToken"
-7: b
-state 8 as "SingleToken"
-8: a
-state 9 as "SingleToken"
-9: b
-state 10 as "SingleToken"
-10: b
-state 11 as "Accept"
-11: 
-5-down->6
-5-down->7
-4-down->5
-3-down->4
-3-down->8
-2-down->3
-2-down->9
-1-down->2
-1-down->10
-0-down->1
-0-down->11
-```
+![alternative text](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/light0x00/light-regex/master/doc/ast.plantuml)
 
 随后,为每个叶子节点确定 first 集, follow 集, 用编译原理的属术语, AST 的叶子节点叫终结符(Terminal),下图中我们用数字标记每一个非终结符, 它们都对应一个 NFA 状态 (后文将提到).
 
-```plantuml
-hide empty description
-title AST of (a|b)*abb$ with first set and follow set
-state 0 as "RegExpr"
-0: (((((a|b)*)a)b)b)
-0: first={ a→1 , b→2 , a→3 }
-state 1 as "AndExpr"
-1: (((((a|b)*)a)b)b)
-1: first={ a→1 , b→2 , a→3 }
-1: follow={ EOF→Accept }
-state 2 as "AndExpr"
-2: ((((a|b)*)a)b)
-2: first={ a→1 , b→2 , a→3 }
-2: follow={ b→5 }
-state 3 as "AndExpr"
-3: (((a|b)*)a)
-3: first={ a→1 , b→2 , a→3 }
-3: follow={ b→4 }
-state 4 as "UnaryExpr"
-4: ((a|b)*)
-4: first={ a→1 , b→2 }
-4: follow={ a→3 }
-state 5 as "OrExpr"
-5: (a|b)
-5: first={ a→1 , b→2 }
-5: follow={ a→3 , a→1 , b→2 }
-state 6 as "<1>SingleToken"
-6: a
-6: first={ a→1 }
-6: follow={ a→3 , a→1 , b→2 }
-state 7 as "<2>SingleToken"
-7: b
-7: first={ b→2 }
-7: follow={ a→3 , a→1 , b→2 }
-state 8 as "<3>SingleToken"
-8: a
-8: first={ a→3 }
-8: follow={ b→4 }
-state 9 as "<4>SingleToken"
-9: b
-9: first={ b→4 }
-9: follow={ b→5 }
-state 10 as "<5>SingleToken"
-10: b
-10: first={ b→5 }
-10: follow={ EOF→Accept }
-state 11 as "Accept"
-11: 
-11: first={ EOF→Accept }
-5-down->6
-5-down->7
-4-down->5
-3-down->4
-3-down->8
-2-down->3
-2-down->9
-1-down->2
-1-down->10
-0-down->1
-0-down->11
-```
+![alternative text](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/light0x00/light-regex/master/doc/ast_with_first_follow.plantuml)
 
 根据 First 集、Follow 集, 我们已经可以知道, 给定一个状态, 输入什么字符可以到达这个状态, 输入什么符号可以从这个状态转换到下一个状态. 所以,得到如下所示的 NFA
 
-```plantuml
-hide empty description
-title NFA of (a|b)*abb$
-state 1
-state 2
-state 3
-state 4
-state 5
-[*]-down->1 : a
-[*]-down->2 : b
-[*]-down->3 : a
-1-down->3 : a
-1-down->1 : a
-1-down->2 : b
-2-down->3 : a
-2-down->1 : a
-2-down->2 : b
-3-down->4 : b
-4-down->5 : b
-5-down->[*] : ∞
-```
+![alternative text](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/light0x00/light-regex/master/doc/nfa.plantuml)
 
 最后,我们使用子集构造法,将 NFA 转为 DFA.
 
-```plantuml
-hide empty description
-title DFA of (a|b)*abb$
-state 5: Accept
-state 2: 2
-state 1: 1,3
-state 3: 2,4
-state 4: 2,5
-[*]-down-> 1 : a 
-[*]-down-> 2 : b 
-2-down-> 1 : a 
-2-down-> 2 : b 
-1-down-> 1 : a 
-1-down-> 3 : b 
-3-down-> 1 : a 
-3-down-> 4 : b 
-4-down-> 1 : a 
-4-down-> 2 : b 
-4-down-> 5 : EOF 
-```
+![alternative text](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/light0x00/light-regex/master/doc/dfa.plantuml)
 
 ## 底层 API
 

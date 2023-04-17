@@ -1,0 +1,21 @@
+@startuml
+hide empty description
+title NFA of (a|b)*abb$
+state 1
+state 2
+state 3
+state 4
+state 5
+[*]-down->1 : a
+[*]-down->2 : b
+[*]-down->3 : a
+1-down->3 : a
+1-down->1 : a
+1-down->2 : b
+2-down->3 : a
+2-down->1 : a
+2-down->2 : b
+3-down->4 : b
+4-down->5 : b
+5-down->[*] : ∞
+@enduml

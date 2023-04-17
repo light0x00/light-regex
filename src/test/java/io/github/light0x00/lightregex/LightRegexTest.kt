@@ -114,5 +114,18 @@ class LightRegexTest {
         println()
         println(RegexVisualizer.astToPlantUML(ast))
     }
+
+    @Test
+    fun testMNExpression(){
+        val regex = LightRegex("(a|b){2,4}$")
+
+        println(regex.match("aa")!=null) //true
+        println(regex.match("ab")!=null) //true
+        println(regex.match("abab")!=null) //true
+
+        println(regex.match("aaaaa")!=null) //false
+        println(regex.match("bbbbb")!=null) //false
+        println(regex.match("ababa")!=null) //false
+    }
 }
 
