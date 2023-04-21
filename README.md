@@ -5,7 +5,7 @@ Central](https://maven-badges.herokuapp.com/maven-central/io.github.light0x00/li
 
 [中文文档](./README.zh.md)
 
-A regular expression engine implementation base on Subset Construction Method. In addition to the baisc functionality,  it exports the API to generate AST, NFA, DFA, which is the underlying principle of the implementation.
+A regular expression engine implementation base on [Subset Construction Method](https://en.wikipedia.org/wiki/Powerset_construction). In addition to the baisc functionality,  it exports the API to generate AST, NFA, DFA, which is the underlying principle of the implementation.
 
 ## Usage
 
@@ -13,7 +13,7 @@ A regular expression engine implementation base on Subset Construction Method. I
 <dependency>
     <groupId>io.github.light0x00</groupId>
     <artifactId>light-regex</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 </dependency>
 ```
 
@@ -24,13 +24,13 @@ val regex = LightRegex("to be[\\w,\\s]+to be")
 val input = "to be, or not to be, that's the question"
 ```
 
-Step 2, Match and get the reuslt returned, which is a `IntRange` contataining the start index and end index of the matched substring.
+Step 2, Match and get the reuslt returned, which is an `IntRange` containing the start index and end index of the matched substring.
 
 ```kotlin
 val result = regex.match(input)
 ```
 
-Ouput the matching result above, we got the substring "to be, or not to be":
+Output the matching result above, we got the substring "to be, or not to be":
 
 ```kotlin
 println(input.substring(result.start, result.endInclusive + 1))

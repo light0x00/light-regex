@@ -3,7 +3,7 @@
 Central](https://maven-badges.herokuapp.com/maven-central/io.github.light0x00/light-regex/badge.svg)
 ](https://repo1.maven.org/maven2/io/github/light0x00/light-regex/)[![Java support](https://img.shields.io/badge/Java-11+-green?logo=java&logoColor=white)](https://openjdk.java.net/)
 
-一个基于子集构造法的正则引擎实现. 在基本的功能之外,还对外提供了底层的 API, 用于生成 AST, NFA, DFA.
+一个基于[子集构造法](https://en.wikipedia.org/wiki/Powerset_construction)的正则引擎实现. 在基本的功能之外,还对外提供了底层的 API, 用于生成 AST, NFA, DFA.
 
 
 ## Usage
@@ -12,7 +12,7 @@ Central](https://maven-badges.herokuapp.com/maven-central/io.github.light0x00/li
 <dependency>
     <groupId>io.github.light0x00</groupId>
     <artifactId>light-regex</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 </dependency>
 ```
 
