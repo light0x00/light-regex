@@ -9,7 +9,7 @@ import java.util.*
 
 val EOF_TOKEN = MetaToken(TokenType.EOF)
 
-/*
+/**
  * 需要可切换分词器的能力的原因在于：
  *
  * 一些符号位于中括号内时，要当作匹配字符处理，如 [/.*(]

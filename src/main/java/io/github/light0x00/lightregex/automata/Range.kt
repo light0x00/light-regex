@@ -11,26 +11,27 @@ import kotlin.reflect.KClass
 
 interface HowIntRangeToString {
     fun infiniteToString(): String
+    fun negativeInfiniteToString(): String
+    fun positiveInfiniteToString(): String
+
     fun intToString(i: Int): String
 }
 
-val DEFAULT_INT_RANGE_TO_STRING = object : HowIntRangeToString {
+private val DEFAULT_INT_RANGE_TO_STRING = object : HowIntRangeToString {
     override fun infiniteToString(): String {
+        return "∞"
+    }
+
+    override fun negativeInfiniteToString(): String {
+        return "∞"
+    }
+
+    override fun positiveInfiniteToString(): String {
         return "∞"
     }
 
     override fun intToString(i: Int): String {
         return i.toString()
-    }
-}
-
-val UNICODE_INT_RANGE_TO_STRING = object : HowIntRangeToString {
-    override fun infiniteToString(): String {
-        return "∞"
-    }
-
-    override fun intToString(i: Int): String {
-        return Unicode.toString(i)
     }
 }
 
@@ -76,7 +77,7 @@ data class LeftInfiniteRange(val end: Int) : IIntRange {
     }
 
     override fun toString(how: HowIntRangeToString): String {
-        return "(∞-${how.intToString(end)})"
+        return "(${how.negativeInfiniteToString()}-${how.intToString(end)})"
     }
 
     override fun toString(): String {
@@ -90,7 +91,7 @@ data class RightInfiniteRange(val start: Int) : IIntRange {
     }
 
     override fun toString(how: HowIntRangeToString): String {
-        return "(${how.intToString(start)}-∞)"
+        return "(${how.intToString(start)}-${how.positiveInfiniteToString()})"
     }
 
     override fun toString(): String {

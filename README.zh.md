@@ -3,7 +3,7 @@
 Central](https://maven-badges.herokuapp.com/maven-central/io.github.light0x00/light-regex/badge.svg)
 ](https://repo1.maven.org/maven2/io/github/light0x00/light-regex/)[![Java support](https://img.shields.io/badge/Java-11+-green?logo=java&logoColor=white)](https://openjdk.java.net/)
 
-一个正则引擎实现. 在基本的功能之外,还对外提供了底层的 API, 用于生成 AST, NFA, DFA.
+一个基于子集构造法的正则引擎实现. 在基本的功能之外,还对外提供了底层的 API, 用于生成 AST, NFA, DFA.
 
 
 ## Usage
@@ -149,13 +149,177 @@ for (m in matches) {
 下面的代码展示了如何得到 AST 、NFA 、DFA, 以及转为 Plant UML 自动机.
 
 ```kotlin
-val ast = RegexSupport.parseAsAST("^(a|b)*abb$") //get AST
-val nfa = RegexSupport.astToNFA(ast)	//convert AST to NFA
-val dfa = RegexSupport.nfaToDFA(nfa)	//convert NFA to DFA
+val ast = RegexSupport.parseAsAST("^(a|b)*abb$")
+val nfa = RegexSupport.astToNFA(ast)
+val dfa = RegexSupport.nfaToDFA(nfa)
 
-println(RegexVisualizer.nfaToPlantUML(nfa)) //ouput AST representation plantuml based 
-println()
-println(RegexVisualizer.dfaToPlantUML(dfa)) //output NFA representation plantuml based
-println()
-println(RegexVisualizer.astToPlantUML(ast))  //output DFA representation plantuml based
+println("===================AST===================")
+println(RegexVisualizer.astToPlantUML(ast))
+println("===================NFA===================")
+println(RegexVisualizer.nfaToPlantUML(nfa))
+println("===================DFA===================")
+println(RegexVisualizer.dfaToPlantUML(dfa))
+println("===================AST with  first/follow set===================")
+println(RegexVisualizer.astToPlantUML(ast))
+```
+
+```
+===================AST===================
+hide empty description
+title AST of (((((a|b)*)a)b)b)
+state 0 as "RegExpr"
+0: (((((a|b)*)a)b)b)
+0: first={ a→1 , b→2 , a→3 }
+state 1 as "AndExpr"
+1: (((((a|b)*)a)b)b)
+1: first={ a→1 , b→2 , a→3 }
+1: follow={ EOF→Accept }
+state 2 as "AndExpr"
+2: ((((a|b)*)a)b)
+2: first={ a→1 , b→2 , a→3 }
+2: follow={ b→5 }
+state 3 as "AndExpr"
+3: (((a|b)*)a)
+3: first={ a→1 , b→2 , a→3 }
+3: follow={ b→4 }
+state 4 as "UnaryExpr"
+4: ((a|b)*)
+4: first={ a→1 , b→2 }
+4: follow={ a→3 }
+state 5 as "OrExpr"
+5: (a|b)
+5: first={ a→1 , b→2 }
+5: follow={ a→3 , a→1 , b→2 }
+state 6 as "<1>SingleToken"
+6: a
+6: first={ a→1 }
+6: follow={ a→3 , a→1 , b→2 }
+state 7 as "<2>SingleToken"
+7: b
+7: first={ b→2 }
+7: follow={ a→3 , a→1 , b→2 }
+state 8 as "<3>SingleToken"
+8: a
+8: first={ a→3 }
+8: follow={ b→4 }
+state 9 as "<4>SingleToken"
+9: b
+9: first={ b→4 }
+9: follow={ b→5 }
+state 10 as "<5>SingleToken"
+10: b
+10: first={ b→5 }
+10: follow={ EOF→Accept }
+state 11 as "Accept"
+11: 
+11: first={ EOF→Accept }
+5-down->6
+5-down->7
+4-down->5
+3-down->4
+3-down->8
+2-down->3
+2-down->9
+1-down->2
+1-down->10
+0-down->1
+0-down->11
+
+===================NFA===================
+hide empty description
+state 1
+state 2
+state 3
+state 4
+state 5
+[*]-down->1 : a
+[*]-down->2 : b
+[*]-down->3 : a
+1-down->3 : a
+1-down->1 : a
+1-down->2 : b
+2-down->3 : a
+2-down->1 : a
+2-down->2 : b
+3-down->4 : b
+4-down->5 : b
+5-down->[*] : EOF
+===================DFA===================
+hide empty description
+state 5: Accept
+state 2: 2
+state 1: 1,3
+state 3: 2,4
+state 4: 2,5
+[*]-down-> 1 : a 
+[*]-down-> 2 : b 
+2-down-> 1 : a 
+2-down-> 2 : b 
+1-down-> 1 : a 
+1-down-> 3 : b 
+3-down-> 1 : a 
+3-down-> 4 : b 
+4-down-> 1 : a 
+4-down-> 2 : b 
+4-down-> 5 : EOF 
+===================AST with  first/follow set===================
+hide empty description
+title AST of (((((a|b)*)a)b)b)
+state 0 as "RegExpr"
+0: (((((a|b)*)a)b)b)
+0: first={ a→1 , b→2 , a→3 }
+state 1 as "AndExpr"
+1: (((((a|b)*)a)b)b)
+1: first={ a→1 , b→2 , a→3 }
+1: follow={ EOF→Accept }
+state 2 as "AndExpr"
+2: ((((a|b)*)a)b)
+2: first={ a→1 , b→2 , a→3 }
+2: follow={ b→5 }
+state 3 as "AndExpr"
+3: (((a|b)*)a)
+3: first={ a→1 , b→2 , a→3 }
+3: follow={ b→4 }
+state 4 as "UnaryExpr"
+4: ((a|b)*)
+4: first={ a→1 , b→2 }
+4: follow={ a→3 }
+state 5 as "OrExpr"
+5: (a|b)
+5: first={ a→1 , b→2 }
+5: follow={ a→3 , a→1 , b→2 }
+state 6 as "<1>SingleToken"
+6: a
+6: first={ a→1 }
+6: follow={ a→3 , a→1 , b→2 }
+state 7 as "<2>SingleToken"
+7: b
+7: first={ b→2 }
+7: follow={ a→3 , a→1 , b→2 }
+state 8 as "<3>SingleToken"
+8: a
+8: first={ a→3 }
+8: follow={ b→4 }
+state 9 as "<4>SingleToken"
+9: b
+9: first={ b→4 }
+9: follow={ b→5 }
+state 10 as "<5>SingleToken"
+10: b
+10: first={ b→5 }
+10: follow={ EOF→Accept }
+state 11 as "Accept"
+11: 
+11: first={ EOF→Accept }
+5-down->6
+5-down->7
+4-down->5
+3-down->4
+3-down->8
+2-down->3
+2-down->9
+1-down->2
+1-down->10
+0-down->1
+0-down->11
 ```

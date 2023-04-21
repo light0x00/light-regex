@@ -17,5 +17,5 @@ state 5
 2-down->2 : b
 3-down->4 : b
 4-down->5 : b
-5-down->[*] : ∞
+5-down->[*] : EOF
 @enduml

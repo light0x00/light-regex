@@ -104,14 +104,19 @@ class LightRegexTest {
 
     @Test
     fun printAST_NFA_DFA(){
-        val ast = RegexSupport.parseAsAST("^(a|b)*abb$")
+//        val ast = RegexSupport.parseAsAST("^(a|b)*abb$")
+//        val ast = RegexSupport.parseAsAST("aa*")
+        val ast = RegexSupport.parseAsAST("(b|[b-d]|[c-h]|.)z")
         val nfa = RegexSupport.astToNFA(ast)
         val dfa = RegexSupport.nfaToDFA(nfa)
 
+        println("===================AST===================")
+        println(RegexVisualizer.astToPlantUML(ast))
+        println("===================NFA===================")
         println(RegexVisualizer.nfaToPlantUML(nfa))
-        println()
+        println("===================DFA===================")
         println(RegexVisualizer.dfaToPlantUML(dfa))
-        println()
+        println("===================AST with  first/follow set===================")
         println(RegexVisualizer.astToPlantUML(ast))
     }
 

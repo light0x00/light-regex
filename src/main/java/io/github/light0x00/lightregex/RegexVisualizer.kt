@@ -57,6 +57,7 @@ class RegexVisualizer {
                     source.appendLine("${node.id}-down->${child.id}")
                 }
             }
+            source.setLength(source.length - 1)
             return source.toString()
         }
 

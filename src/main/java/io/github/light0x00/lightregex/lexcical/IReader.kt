@@ -7,7 +7,7 @@ package io.github.light0x00.lightregex.lexcical
 interface IReader : ILocalizable {
 
     /**
-     * 向后读一个字符,当读到最后一个字符，继续读则返 [Unicode.EOF]
+     * 向后读一个字符,当读到最后一个字符，继续读则返 Unicode.EOF
      */
     fun read(): Int
 

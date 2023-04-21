@@ -1,0 +1,36 @@
+//中括号表达式
+range_literal -> SINGLE_LITERAL | SINGLE_LITERAL '-'  SINGLE_LITERAL
+or_expr_2 ->
+				range_literal  {Reduce IF lookahead = ']'}
+				|
+				range_literal {Shift IF lookahead!=']'}  or_expr_2
+square_bracket_expr -> '[' or_expr_2 ']'
+
+//基本元素
+primary_expr -> SINGLE_LITERAL | square_bracket_expr | '(' expr ')'
+
+//一元表达式
+unary_expr ->
+		primary_expr |
+		primary_expr '*' |
+		primary_expr '?' |
+		primary_expr '+' |
+		primary_expr '{m,n}'
+
+//or表达式
+or_expr ->
+    unary_expr {Reduce ELSE}
+    |
+    unary_expr {Shift IF lookahead='|'} '｜' or_expr
+
+//and表达式
+and_expr ->
+    or_expr {Reduce ELSE}
+    |
+    or_expr {Shift IF lookahead not in '$',EOF,')'  } and_expr
+
+//表达式
+expr ->
+		and_expr |
+		'^' and_expr |
+		'^' and_expr '$'
