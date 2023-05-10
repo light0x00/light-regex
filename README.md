@@ -3,7 +3,7 @@
 Central](https://maven-badges.herokuapp.com/maven-central/io.github.light0x00/light-regex/badge.svg)
 ](https://repo1.maven.org/maven2/io/github/light0x00/light-regex/)[![Java support](https://img.shields.io/badge/Java-11+-green?logo=java&logoColor=white)](https://openjdk.java.net/)
 
-[中文文档](./README.zh.md)
+English | [中文](./README.zh.md)
 
 A regular expression engine implementation base on [Subset Construction Method](https://en.wikipedia.org/wiki/Powerset_construction). In addition to the baisc functionality,  it exports the API to generate AST, NFA, DFA, which is the underlying principle of the implementation.
 
