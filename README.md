@@ -28,7 +28,7 @@ In the end, we use the well-known Subset Construction Algorithem ,to convert the
 
 ## Underlying API
 
-The following shows the built-in APIs to do the things mentioned above, parsing AST, generating NFA, NFA to DFA , and the APIs to generate the visualized representation (Plant UML based).
+The following shows the built-in APIs to do the things mentioned above, parsing AST, generating NFA, converting NFA to DFA , and the APIs to generate the visualized representation (Plant UML based).
 
 ```kotlin
 val ast = RegexSupport.parseAsAST("^(a|b)*abb$")
