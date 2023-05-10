@@ -17,7 +17,7 @@ A regular expression engine implementation base on [Subset Construction Method](
 </dependency>
 ```
 
-Step 1, Given a expression and a input string
+Step 1, Given an expression and an input string
 
 ```kotlin
 val regex = LightRegex("to be[\\w,\\s]+to be")
